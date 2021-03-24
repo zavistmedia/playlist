@@ -227,16 +227,19 @@ var jpmplayer = {};
 			playlists.innerHTML = '<div class="yourlists-item">Sorry, cannot access local storage from your browser. Please allow local storage or try another browser.</div>';
 		}
 	}
-	p.playVideo = function (vid,domain,tld,clicked) {
+	p.playVideo = function (vid,domain,tld,clicked,autoplay) {
 		// auto play is set for YT... may not work if YT blocks
 		// console.log(clicked);
 		// document.getElementById(clicked).style.backgroundColor = '#111';
+		
 		let video = document.getElementById('videoframe');
 		let leftface = document.getElementById('left-column');
 		let embed = domain+tld;
 		embed = (embed == 'youtu.be') ? 'youtube.com' : embed;
 		let symbol = vid.indexOf('?') > -1 ? '&' : '?';
-		let extend = (embed == 'youtube.com' || embed == 'bitchute.com') ? symbol +'autoplay=1' : '';
+		if(autoplay){
+			let extend = (embed == 'youtube.com' || embed == 'bitchute.com' || embed == 'dailymotion.com') ? symbol +'autoplay=1' : '';
+		}
 		video.src = "https://www."+embed+"/embed/"+vid+extend;
 		if(!document.getElementById('loadingdiv')){
 			var loading = document.createElement('div');
@@ -298,7 +301,7 @@ var jpmplayer = {};
 						}
 
 						//<div class="videoimg">'+img+'</div>
-						 row += '<div class="playlist-item"><div class="videotitle"><a href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\')" id="video-'+i+'">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',this)"></span></div></div>';
+						 row += '<div class="playlist-item"><div class="videotitle"><a href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',this)"></span></div></div>';
 						 if(count == 0){
 							lasti = i;
 						 }
@@ -311,7 +314,7 @@ var jpmplayer = {};
 				document.getElementById("playlist").innerHTML = '<div style="margin-bottom:20px"><a href="javascript:jpmplayer.sortList(\''+listid+'\',\'a-z\')">A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'z-a\')">Z-A</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'\')">Newest</a></div>' + row + '<div style="margin-top:20px"><a href="javascript:jpmplayer.export(\''+listid+'\')">Export</a> &nbsp; <a href="javascript:jpmplayer.import(\'create\',\'sidebar\')">Import</a></div>';
 
 				if(has_videos){
-					this.playVideo(''+items[lasti].id+'',''+items[lasti].type+'',''+items[lasti].tld+'','video-'+lasti);
+					this.playVideo(''+items[lasti].id+'',''+items[lasti].type+'',''+items[lasti].tld+'','video-'+lasti,false);
 				}
 			}
 		}
