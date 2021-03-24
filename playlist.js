@@ -237,8 +237,9 @@ var jpmplayer = {};
 		let embed = domain+tld;
 		embed = (embed == 'youtu.be') ? 'youtube.com' : embed;
 		let symbol = vid.indexOf('?') > -1 ? '&' : '?';
+		let extend = '';
 		if(autoplay){
-			let extend = (embed == 'youtube.com' || embed == 'bitchute.com' || embed == 'dailymotion.com') ? symbol +'autoplay=1' : '';
+			extend = (embed == 'youtube.com' || embed == 'bitchute.com' || embed == 'dailymotion.com') ? symbol +'autoplay=1' : '';
 		}
 		video.src = "https://www."+embed+"/embed/"+vid+extend;
 		if(!document.getElementById('loadingdiv')){
