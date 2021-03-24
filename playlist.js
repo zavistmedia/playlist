@@ -28,7 +28,7 @@ new CSS UI using only flex design for playlist etc
 var jpmplayer = {};
 (function(p){
 	p.playerUID = 'X2';
-	p.reg = /[^A-Za-z0-9‘’”“'"*$#^+!()=?&:/_.-\s]/g;
+	p.reg = /[^A-Za-z0-9,‘’”“'"*$#^+!()=?&:/_.-\s]/g;
 	p.urlreg = /[^A-Za-z0-9'"*$#^+!()=?&:/_.-]/g;
 	p.regmatch = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i;
 	p.regmatch2 = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(.+)/i;
@@ -230,7 +230,16 @@ var jpmplayer = {};
 	p.playVideo = function (vid,domain,tld,clicked,autoplay) {
 		// auto play is set for YT... may not work if YT blocks
 		// console.log(clicked);
-		// document.getElementById(clicked).style.backgroundColor = '#111';
+		
+		
+		
+		let cssclicked = document.querySelector('.clickeditem');
+		if(cssclicked !== null && cssclicked !== undefined){
+			console.log(cssclicked);
+			cssclicked.setAttribute('class','visiteditem');
+		}
+		
+		document.getElementById(clicked).setAttribute('class','clickeditem');
 		
 		let video = document.getElementById('videoframe');
 		let leftface = document.getElementById('left-column');
@@ -302,7 +311,7 @@ var jpmplayer = {};
 						}
 
 						//<div class="videoimg">'+img+'</div>
-						 row += '<div class="playlist-item"><div class="videotitle"><a href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',this)"></span></div></div>';
+						 row += '<div class="playlist-item"><a href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',this)"></span></div>';
 						 if(count == 0){
 							lasti = i;
 						 }
@@ -311,7 +320,7 @@ var jpmplayer = {};
 				}
 				count--;
 
-				row += '<div class="playlist-item"><div class="videotitle"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:12px;color:#ccc">Powered by JPM Playlist</a></div></div>';
+				row += '<div class="playlist-item"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:12px;color:#ccc">Powered by JPM Playlist</a></div>';
 				document.getElementById("playlist").innerHTML = '<div style="margin-bottom:20px"><a href="javascript:jpmplayer.sortList(\''+listid+'\',\'a-z\')">A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'z-a\')">Z-A</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'\')">Newest</a></div>' + row + '<div style="margin-top:20px"><a href="javascript:jpmplayer.export(\''+listid+'\')">Export</a> &nbsp; <a href="javascript:jpmplayer.import(\'create\',\'sidebar\')">Import</a></div>';
 
 				if(has_videos){

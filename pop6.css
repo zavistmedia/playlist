@@ -14,6 +14,11 @@
  // for support, see my blog: https://jimswebtech.blogspot.com/
 
  */
+a.clickeditem {
+	background-color:#111 !important;
+	color: #fff !important;
+}
+a.visiteditem {}
 div.videotitle a {
 	padding: 15px 40px 15px 15px;
 	text-decoration: none;
@@ -37,38 +42,29 @@ div.videoimg {
 	width: 100px;
 	position: relative;
 }
-div.playlist-item {
-	max-width: 100%;
-	padding: 0;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	column-gap: 10px;
-	flex-wrap: wrap;
-}
 div#yourlists{
 	margin: 20px 0px;
-	border-top: 1px solid #000;
 	width: 280px;
 	display: none;
 }
 div.yourlists-item {
+    max-width: 100%;
+    padding: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    height: auto;
 	border-bottom: 1px solid #000;
-	position: relative;
-	overflow-wrap: break-word;
 }
-div.yourlists-item a:hover, div.videotitle a:hover {
+div.yourlists-item a:hover, div.playlist-item a:hover {
 	background-color: #111;
 }
 div.yourlists-item a{
-	box-sizing: border-box;
-	background-color:#333;
-	padding: 10px;
-	padding-right: 40px;
-	width: 100%;
-	display: block;
-	text-decoration: none;
-	outline: none;
+    padding: 15px 40px 15px 15px;
+    text-decoration: none;
+    background-color: #333;
+    outline: none;
+    width: 90%;
+    flex: 1;
 }
 html {
 	background: #15161c url('music2.jpg') no-repeat top center fixed;
@@ -177,14 +173,14 @@ section#comments {
 	overflow-y: auto;
 }
 a {
-	color: #ffff02;
+	color: yellowgreen;
 }
 p {
 	margin-bottom: 0;
 	line-height: 1.5em;
 }
 h1 {
-	color: #f3e462;
+	color: yellowgreen;
 	font-size: 2em;
 	margin: 0 0 .5em 0;
 }
@@ -320,23 +316,45 @@ div.underlay {
 	width: 100%;
 	height: 100%;
 }
-span.removeitem{
-	position: absolute;
-	right: 0;
-	top: 0;
-	z-index: 1;
-	font-size: 22px;
-	padding:10px;
-	cursor: pointer;
+div.playlist-item {
+    max-width: 100%;
+    padding: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    height: auto;
+	border-bottom: 1px solid #000;
+}
+div.playlist-item a {
+    padding: 15px 40px 15px 15px;
+    text-decoration: none;
+    background-color: #333;
+    outline: none;
+    width: 90%;
+    flex: 1;
+}
+span.removeitem {
+    font-size: 22px;
+    cursor: pointer;
+    background-color: yellowgreen;
+    flex: 1;
+    max-width: 35px;
+    display: flex;
+    color: #111;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }
 span.removelist{
-	position: absolute;
-	right: 0;
-	top: 0;
-	z-index: 1;
-	font-size: 18px;
-	padding:10px;
-	cursor: pointer;
+    font-size: 22px;
+    cursor: pointer;
+    background-color: yellowgreen;
+    flex: 1;
+    max-width: 35px;
+    display: flex;
+    color: #111;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }
 a.closebutton:hover, a.closebutton2:hover {}
 
