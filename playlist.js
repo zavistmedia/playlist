@@ -230,17 +230,17 @@ var jpmplayer = {};
 	p.playVideo = function (vid,domain,tld,clicked,autoplay) {
 		// auto play is set for YT... may not work if YT blocks
 		// console.log(clicked);
-		
-		
-		
+
+
+
 		let cssclicked = document.querySelector('.clickeditem');
 		if(cssclicked !== null && cssclicked !== undefined){
 			console.log(cssclicked);
 			cssclicked.setAttribute('class','visiteditem');
 		}
-		
+
 		document.getElementById(clicked).setAttribute('class','clickeditem');
-		
+
 		let video = document.getElementById('videoframe');
 		let leftface = document.getElementById('left-column');
 		let embed = domain+tld;
@@ -347,9 +347,18 @@ var jpmplayer = {};
 
 		elem.parentElement.remove();
 		if(typeof(Storage) !== 'undefined') {
+			
 			let playlist = localStorage.getItem("playlist"+p.playerUID);
 			if(playlist){
 				let pitems = [];
+				pitems = JSON.parse(playlist);
+				for(let i = 0;pitems.length>i;i++){
+					if(pitems[i].list == listid)
+					{
+						console.log(pitems[i])
+						pitems.splice(i, 1);
+					}
+				}
 				localStorage.setItem("playlist"+p.playerUID, JSON.stringify(pitems));
 			}
 
