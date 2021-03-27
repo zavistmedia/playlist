@@ -42,10 +42,18 @@ div.videoimg {
 	width: 100px;
 	position: relative;
 }
+div#jpmplayer {
+	border-top: 1px solid #000;
+	border-left: 1px solid #000;
+	border-right: 1px solid #000;	
+}
 div#yourlists{
 	margin: 20px 0px;
 	width: 280px;
 	display: none;
+	border-top: 1px solid #000;
+	border-left: 1px solid #000;
+	border-right: 1px solid #000;
 }
 div.yourlists-item {
     max-width: 100%;
@@ -67,7 +75,8 @@ div.yourlists-item a{
     flex: 1;
 }
 html {
-	background: #15161c url('music2.jpg') no-repeat top center fixed;
+	/*background: #15161c url('music2.jpg') no-repeat top center fixed;*/
+	background-color: #15161c; 
 	background-size: cover;
 }
 input {
@@ -455,7 +464,7 @@ div.right-column {
 	justify-content: normal;
 	min-width: 320px;
 	max-width: 340px;
-	height: 100%;
+	height: auto;
 	flex-direction: column;
 	background-color: #222;
 	padding: 0;

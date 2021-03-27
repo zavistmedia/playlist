@@ -4,7 +4,7 @@
  // http://www.jpmalloy.com
  // james (@) jpmalloy.com
  // Credit must stay intact for legal use
- // Version 1 (build "1")
+ // Version 1 (build "1.1")
  // *** 100% free, do with what you like with credit back ***
  // No outside plugins required
  // Feel free to share with others
@@ -20,7 +20,6 @@ Supported URLs:
 To-do Notes:
 in the future all alerts will be replaced with a custom alert box
 data input checks will be improved for import option
-new CSS UI using only flex design for playlist etc
 
 */
 
@@ -43,7 +42,6 @@ var jpmplayer = {};
 			var buttonname = 'importbutton';
 			var local = 'right-column';
 		}
-
 		if(!document.getElementById(boxname)){
 			var input = document.createElement('textarea');
 			if(control == 'sidebar'){
@@ -229,18 +227,11 @@ var jpmplayer = {};
 	}
 	p.playVideo = function (vid,domain,tld,clicked,autoplay) {
 		// auto play is set for YT... may not work if YT blocks
-		// console.log(clicked);
-
-
-
 		let cssclicked = document.querySelector('.clickeditem');
 		if(cssclicked !== null && cssclicked !== undefined){
-			console.log(cssclicked);
 			cssclicked.setAttribute('class','visiteditem');
 		}
-
 		document.getElementById(clicked).setAttribute('class','clickeditem');
-
 		let video = document.getElementById('videoframe');
 		let leftface = document.getElementById('left-column');
 		let embed = domain+tld;
@@ -308,9 +299,8 @@ var jpmplayer = {};
 						let img = '';
 						if(items[i].type == 'youtube'){
 							//img = '<img src="https://i.ytimg.com/vi/'+items[i].id+'/hqdefault.jpg" alt="" style="width:100px;height:auto" />'
+							//<div class="videoimg">'+img+'</div>
 						}
-
-						//<div class="videoimg">'+img+'</div>
 						 row += '<div class="playlist-item"><a href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',this)"></span></div>';
 						 if(count == 0){
 							lasti = i;
@@ -321,7 +311,7 @@ var jpmplayer = {};
 				count--;
 
 				row += '<div class="playlist-item"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:12px;color:#ccc">Powered by JPM Playlist</a></div>';
-				document.getElementById("playlist").innerHTML = '<div style="margin-bottom:20px"><a href="javascript:jpmplayer.sortList(\''+listid+'\',\'a-z\')">A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'z-a\')">Z-A</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'\')">Newest</a></div>' + row + '<div style="margin-top:20px"><a href="javascript:jpmplayer.export(\''+listid+'\')">Export</a> &nbsp; <a href="javascript:jpmplayer.import(\'create\',\'sidebar\')">Import</a></div>';
+				document.getElementById("playlist").innerHTML = '<div style="margin-bottom:20px"><a href="javascript:jpmplayer.sortList(\''+listid+'\',\'a-z\')">A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'z-a\')">Z-A</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'\')">Newest</a></div><div id="jpmplayer">' + row + '</div><div style="margin-top:20px"><a href="javascript:jpmplayer.export(\''+listid+'\')">Export</a> &nbsp; <a href="javascript:jpmplayer.import(\'create\',\'sidebar\')">Import</a></div>';
 
 				if(has_videos){
 					this.playVideo(''+items[lasti].id+'',''+items[lasti].type+'',''+items[lasti].tld+'','video-'+lasti,false);
@@ -344,22 +334,23 @@ var jpmplayer = {};
 		return false;
 	}
 	p.removeList = function(listid,elem) {
-
 		elem.parentElement.remove();
 		if(typeof(Storage) !== 'undefined') {
-			
+			// fixed bug in build 1
 			let playlist = localStorage.getItem("playlist"+p.playerUID);
 			if(playlist){
-				let pitems = [];
-				pitems = JSON.parse(playlist);
+				let pitems = JSON.parse(playlist);
+				let newList = []
 				for(let i = 0;pitems.length>i;i++){
 					if(pitems[i].list == listid)
 					{
-						console.log(pitems[i])
-						pitems.splice(i, 1);
+						console.log(pitems[i],listid,'removed');
+					}else {
+						newList.push(pitems[i]);
 					}
 				}
-				localStorage.setItem("playlist"+p.playerUID, JSON.stringify(pitems));
+				console.log(newList);
+				localStorage.setItem("playlist"+p.playerUID, JSON.stringify(newList));
 			}
 
 			let list = localStorage.getItem("playlists"+p.playerUID);
@@ -368,7 +359,7 @@ var jpmplayer = {};
 				for(let i = 0;items.length>i;i++){
 					if(items[i].id == listid)
 					{
-						console.log(items[i]);
+						//console.log(items[i]);
 						items.splice(i, 1);
 					}
 				}
@@ -404,6 +395,10 @@ var jpmplayer = {};
 					var spliturl = url.split('&');
 					url = spliturl[0];
 				}
+
+				// for debugging ... do not uncomment
+				// url = 'http://www..com/x2-' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
+
 				url = url.replace(this.urlreg, '');
 				let title = prompt("Enter video title:");
 				if(title == null || title == ''){
