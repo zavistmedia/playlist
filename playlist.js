@@ -4,7 +4,7 @@
  // http://www.jpmalloy.com
  // james (@) jpmalloy.com
  // Credit must stay intact for legal use
- // Version 1 (build "1.1")
+ // Version 1 (build "1.2")
  // *** 100% free, do with what you like with credit back ***
  // No outside plugins required
  // Feel free to share with others
@@ -20,7 +20,6 @@ Supported URLs:
 To-do Notes:
 in the future all alerts will be replaced with a custom alert box
 data input checks will be improved for import option
-
 */
 
 'use strict';
@@ -40,12 +39,12 @@ var jpmplayer = {};
 		}else {
 			var boxname = 'exported';
 			var buttonname = 'importbutton';
-			var local = 'right-column';
+			var local = 'sidebarlist';
 		}
 		if(!document.getElementById(boxname)){
 			var input = document.createElement('textarea');
 			if(control == 'sidebar'){
-				input.setAttribute('style','display:block;width:auto;height:160px;margin:20px;box-sizing:border-box');
+				//input.setAttribute('style','display:block;width:auto;height:160px;margin:20px;box-sizing:border-box');
 			}else {
 				input.setAttribute('style','display:block;width:100%;height:160px;margin-top:20px;box-sizing:border-box');
 			}
@@ -62,7 +61,7 @@ var jpmplayer = {};
 			}
 			button.setAttribute('id',buttonname);
 			if(control == 'sidebar'){
-				button.setAttribute('style','margin:0px 20px;width:auto');
+				button.setAttribute('style','margin-top:20px;width:auto');
 			}else {
 				button.setAttribute('style','margin-top:20px;width:auto');
 			}
@@ -167,9 +166,9 @@ var jpmplayer = {};
 			if(!document.getElementById('exported')){
 				var input = document.createElement('textarea');
 				//input.setAttribute('type','text');
-				input.setAttribute('style','display:block;width:auto;height:160px;margin:20px;box-sizing:border-box');
+				//input.setAttribute('style','');
 				input.setAttribute('id','exported');
-				document.getElementById('right-column').appendChild(input);
+				document.getElementById('sidebarlist').appendChild(input);
 			}else {
 				var input = document.getElementById('exported');
 			}
@@ -251,6 +250,7 @@ var jpmplayer = {};
 		}else {
 			var loading = document.getElementById('loadingdiv');
 		}
+
 		loading.style.display = 'block';
 		video.onload = function () {
 			loading.style.display = 'none';
@@ -385,22 +385,33 @@ var jpmplayer = {};
 			}
 		}
 	}
+	p.addForm = function(mode){
+		if(mode == 'add'){
+			document.getElementById("addform").style.display = 'none';
+			document.getElementById("addvideoform").style.display = 'block';
+		}else {
+			document.getElementById("addvideoform").style.display = 'none';
+			document.getElementById("addform").style.display = 'block';
+		}
+	}
     p.addItem = function(listid) {
 		if(typeof(Storage) !== 'undefined') {
 			let list = [];
-			let url = prompt("Enter video URL:");
-			if(url != null){
-
+			//let url = prompt("Enter video URL:");
+			let urlinput = document.getElementById("videourl");
+			let url = urlinput.value;
+			// for debugging ... do not uncomment
+			// url = 'http://www.youtube.com/x2-' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
+			if(url != null && url != ''){
 				if(url.indexOf('&') > -1){
 					var spliturl = url.split('&');
 					url = spliturl[0];
 				}
 
-				// for debugging ... do not uncomment
-				// url = 'http://www..com/x2-' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
-
 				url = url.replace(this.urlreg, '');
-				let title = prompt("Enter video title:");
+				//let title = prompt("Enter video title:");
+				let titleinput = document.getElementById("videotitle");
+				let title = titleinput.value;
 				if(title == null || title == ''){
 					title = 'Untitled video';
 				}else {
@@ -418,6 +429,8 @@ var jpmplayer = {};
 					if(!p.in_array(vid,list,listid)){
 						list.push({"id":vid,"title":title,"type":type,"list":listid,"tld":tld});
 						localStorage.setItem("playlist"+p.playerUID, JSON.stringify(list));
+						urlinput.value = '';
+						titleinput.value = '';
 					}else {
 						alert('This video already exists in the playlist.');
 					}
@@ -430,6 +443,8 @@ var jpmplayer = {};
 						if(!p.in_array(vid,list,listid)){
 							list.push({"id":vid,"title":title,"type":type,"list":listid,"tld":tld});
 							localStorage.setItem("playlist"+p.playerUID, JSON.stringify(list));
+							urlinput.value = '';
+							titleinput.value = '';
 						}else {
 							alert('This video already exists in the playlist.');
 						}
@@ -438,6 +453,8 @@ var jpmplayer = {};
 					}
 				}
 				p.getList(listid);
+			}else {
+				alert('A video URL is required input.');
 			}
 		}
 	}
