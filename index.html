@@ -25,7 +25,7 @@
 </section>
 <section class="examples" style="margin-top:20px">
 	<h2>Download</h2>
-	<p>Coming soon!</p>
+	<p><a href="jpmplaylist.zip" download="jpmplaylist.zip">Version 1</a></p>
 </section>
 <script>
 	var jpmx2 = new jpmpopup({
@@ -37,7 +37,7 @@
 		//allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 		jpmx2.item = {
 		'id':'1','type':'','file':'',
-		'html':'<div class="wrap-container"><div class="left-column" id="left-column"><iframe width="760" height="515" src="" style="max-width:100%;max-height:100%;" frameborder="0" id="videoframe" allowfullscreen></iframe></div><div class="right-column" id="right-column"><div style="margin-top:60px;padding:0 20px"><button onclick="jpmplayer.addItem(\''+id+'\')" style="width:100px">Add Video</button><div style="padding-top:20px" id="playlist"></div></div></div>'
+		'html':'<div class="wrap-container"><div class="left-column" id="left-column"><iframe width="760" height="515" src="" style="max-width:100%;max-height:100%;" frameborder="0" id="videoframe" allowfullscreen></iframe></div><div class="right-column" id="right-column"><div id="sidebarlist"><button onclick="jpmplayer.addForm(\'add\')" style="width:100px" id="addform">Add Videos</button><div id="addvideoform"><form method="post" action="" onsubmit="return false;"><div><input type="text" placeholder="Video Title" id="videotitle" /></div><div><input type="text" placeholder="Video URL" id="videourl" /></div><button onclick="jpmplayer.addItem(\''+id+'\')" style="width:100px">Add Video</button> &nbsp; <button onclick="jpmplayer.addForm(\'done\')" style="width:100px">Done</button></form></div><div id="playlist"></div></div></div>'
 		};
 		jpmx2.container = 'player1';
 		jpmx2.style = 'width:100%;z-index:5;background-color:rgba(0, 0, 0, 0.9)';
