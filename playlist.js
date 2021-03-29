@@ -51,8 +51,7 @@ var jpmplayer = {};
 			input.setAttribute('id',boxname);
 			input.setAttribute('placeholder',"Paste list data here to import.");
 			document.getElementById(local).appendChild(input);
-		}
-		if(!document.getElementById(buttonname)){
+
 			var button = document.createElement('button');
 			if(control == 'sidebar'){
 				button.setAttribute('onclick','javascript:jpmplayer.import(\'ini\',\'sidebar\')');
@@ -65,11 +64,12 @@ var jpmplayer = {};
 			}else {
 				button.setAttribute('style','margin-top:20px;width:auto');
 			}
-			button.innerHTML = 'Import list';
+			button.innerHTML = 'Import';
 			document.getElementById(local).appendChild(button);
 		}
+
 		if(mode != 'create'){
-			var input = document.getElementById(boxname);
+			let input = document.getElementById(boxname);
 			let liststring = input.value;
 			try{
 				let pitems = JSON.parse(liststring);
@@ -118,13 +118,23 @@ var jpmplayer = {};
 			catch(err){
 				alert('Sorry, could not import playlist. The data is corrupted. ' + err);
 			}
+		}else {
+			if(control != 'sidebar'){
+				let importbutton = document.getElementById(buttonname);
+				let importbox = document.getElementById(local);
+				let importbuttonval = importbutton.innerHTML.toLowerCase();
+				if(importbuttonval == 'import'){
+					importbox.style.display = 'block';
+					importbutton.innerHTML = 'Close Import';
+				}else {
+					importbox.style.display = 'none';
+					importbutton.innerHTML = 'Import';
+				}
+			}
 		}
 	}
 	p.export = function(listid) {
 
-		if(document.getElementById('importbutton')){
-			document.getElementById('importbutton').remove()
-		}
 		let playlist = localStorage.getItem("playlists"+p.playerUID);
 		if(playlist){
 			console.log(playlist);
@@ -164,11 +174,17 @@ var jpmplayer = {};
 			let pliststring = JSON.stringify(plist[0]);
 			liststring = '{"playlist":'+pliststring+',"data":'+liststring+'}';
 			if(!document.getElementById('exported')){
+
 				var input = document.createElement('textarea');
-				//input.setAttribute('type','text');
-				//input.setAttribute('style','');
 				input.setAttribute('id','exported');
 				document.getElementById('sidebarlist').appendChild(input);
+
+				var button = document.createElement('button');
+				button.setAttribute('onclick','javascript:jpmplayer.import(\'ini\',\'sidebar\')');button.setAttribute('id','importbutton');
+				button.setAttribute('style','margin-top:20px;width:auto');
+				button.innerHTML = 'Import';
+				document.getElementById('sidebarlist').appendChild(button);
+
 			}else {
 				var input = document.getElementById('exported');
 			}
@@ -182,6 +198,7 @@ var jpmplayer = {};
 	p.createPlaylist = function() {
 		let list = [];
 		document.getElementById('mainimport').innerHTML = '';
+		document.getElementById('importbutton2').innerHTML = 'Import';
 		let title = prompt("Enter a title for this playlist:");
 		if(title != null){
 			title = (title == '') ? 'Untitled playlist' : title;
@@ -193,7 +210,13 @@ var jpmplayer = {};
 			let d = (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
 			if(!p.in_array2(d,list)){
 				list.push({"id":d,"title":title});
-				localStorage.setItem("playlists"+p.playerUID, JSON.stringify(list));
+				try {
+					localStorage.setItem("playlists"+p.playerUID, JSON.stringify(list));
+				} catch (e) {
+					if (e == QUOTA_EXCEEDED_ERR || e.code === "22" || e.code === "1024") {
+						alert('Local storage is full. Please remove old playlist videos to add new ones.');
+					}
+				}
 				p.getPlaylists();
 				console.log(list);
 			}
@@ -240,6 +263,7 @@ var jpmplayer = {};
 		if(autoplay){
 			extend = (embed == 'youtube.com' || embed == 'bitchute.com' || embed == 'dailymotion.com') ? symbol +'autoplay=1' : '';
 		}
+
 		video.src = "https://www."+embed+"/embed/"+vid+extend;
 		if(!document.getElementById('loadingdiv')){
 			var loading = document.createElement('div');
@@ -401,7 +425,7 @@ var jpmplayer = {};
 			let urlinput = document.getElementById("videourl");
 			let url = urlinput.value;
 			// for debugging ... do not uncomment
-			// url = 'http://www.youtube.com/x2-' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
+			//url = 'http://www.youtube.com/x2-' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
 			if(url != null && url != ''){
 				if(url.indexOf('&') > -1){
 					var spliturl = url.split('&');
@@ -428,7 +452,13 @@ var jpmplayer = {};
 					let tld = matches[3];
 					if(!p.in_array(vid,list,listid)){
 						list.push({"id":vid,"title":title,"type":type,"list":listid,"tld":tld});
-						localStorage.setItem("playlist"+p.playerUID, JSON.stringify(list));
+						try {
+							localStorage.setItem("playlist"+p.playerUID, JSON.stringify(list));
+						} catch (e) {
+							if (e == QUOTA_EXCEEDED_ERR || e.code === "22" || e.code === "1024") {
+								alert('Local storage is full. Please remove old playlist videos to add new ones.');
+							}
+						}
 						urlinput.value = '';
 						titleinput.value = '';
 					}else {
@@ -442,7 +472,13 @@ var jpmplayer = {};
 						let tld = matches[3];
 						if(!p.in_array(vid,list,listid)){
 							list.push({"id":vid,"title":title,"type":type,"list":listid,"tld":tld});
-							localStorage.setItem("playlist"+p.playerUID, JSON.stringify(list));
+							try {
+								localStorage.setItem("playlist"+p.playerUID, JSON.stringify(list));
+							} catch (e) {
+								if (e == QUOTA_EXCEEDED_ERR || e.code === "22" || e.code === "1024") {
+									alert('Local storage is full. Please remove old playlist videos to add new ones.');
+								}
+							}
 							urlinput.value = '';
 							titleinput.value = '';
 						}else {
