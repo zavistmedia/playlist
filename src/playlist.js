@@ -4,7 +4,7 @@
  // http://www.jpmalloy.com
  // james (@) jpmalloy.com
  // Credit must stay intact for legal use
- // Version 1 (build "1.3")
+ // Version 2 (build "1.1")
  // *** 100% free, do with what you like with credit back ***
  // No outside plugins required
  // Feel free to share with others
@@ -20,64 +20,40 @@ Supported URLs:
 To-do Notes:
 in the future all alerts will be replaced with a custom alert box
 data input checks will be improved for import option
+clean up code, create error handling function etc
+create seperate function for HTML interface creation etc... a controller
 */
 
 'use strict';
 var jpmplayer = {};
 (function(p){
 	p.playerUID = 'X2';
+	p.playlist = {};
 	p.reg = /[^A-Za-z0-9,‘’”“'"*$#^+!()=?&:/_.-\s]/g;
 	p.urlreg = /[^A-Za-z0-9'"*$#^+!()=?&:/_.-]/g;
-	p.regmatch = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i;
+	p.regmatch =/(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i;
 	p.regmatch2 = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(.+)/i;
-	// build 1.3 added
 	p.importAll = function(pitems) {
-		//console.log(pitems.playlist.length);
 		if(localStorage.getItem("playlists"+p.playerUID)){
 			try{
-				let items = JSON.parse(localStorage.getItem("playlist"+p.playerUID));
-				items = (items === null || items === undefined) ? [] : items;			
 				let list = JSON.parse(localStorage.getItem("playlists"+p.playerUID));
 				list = (list === null || list === undefined) ? [] : list;
 				let videos = [];
-				for(let i = 0;pitems.playlist.length>i;i++){
-					var id = pitems.playlist[i].id;
-					var title = pitems.playlist[i].title;
+				for(let i = 0;pitems.playlists.length>i;i++){
+					var id = pitems.playlists[i].id;
+					var title = pitems.playlists[i].title;
 					if(!p.in_array2(id,list)){
 						// playlist not in existing array, add it
-						list.push({"id":id,"title":title});
-						if(items.length > 0){
-							for(let x = 0;pitems.data.length>x;x++){
-								if(pitems.data[x].list == id){
-									items = items.concat(pitems.data[x]);
-								}
-							}
-						}
+						list.push({"id":id,"title":title,"data":pitems.playlists[i].data});
+					}else {
+						alert('Could not add playlist '+title+' ('+id+'), because it already exists.');
 					}
 				}
-				
 				try {
 					localStorage.setItem("playlists"+p.playerUID, JSON.stringify(list));
 				} catch (e) {
 					if (e == QUOTA_EXCEEDED_ERR || e.code === "22" || e.code === "1024") {
 						alert('Local storage is full. Please remove old playlist videos to add new ones.');
-					}
-				}
-				
-				if(items.length == 0){
-					videos = pitems.data;
-				}else {
-					videos = items;
-				}
-				if(videos.length > 0){
-					// store new videos
-					// console.log(videos);
-					try {
-						localStorage.setItem("playlist"+p.playerUID, JSON.stringify(videos));
-					} catch (e) {
-						if (e == QUOTA_EXCEEDED_ERR || e.code === "22" || e.code === "1024") {
-							alert('Local storage is full. Please remove old playlist videos to add new ones.');
-						}
 					}
 				}
 				document.getElementById('mainimport').innerHTML = '';
@@ -88,6 +64,10 @@ var jpmplayer = {};
 		}
 	}
 	p.import = function(mode,control) {
+		
+		if(typeof(Storage) === 'undefined') {
+			alert("Warning! You cannot import data, because your browser does not support storage.");
+		}
 
 		if(control == 'main'){
 			var boxname = 'exported2';
@@ -129,29 +109,19 @@ var jpmplayer = {};
 			let input = document.getElementById(boxname);
 			let liststring = input.value;
 			try{
-				// this needs to be optimized for build 1.4
 				let pitems = JSON.parse(liststring);
-				let title = pitems.playlist.title;
-				if(title !== undefined){
+				if(pitems.playlist !== undefined){
+					let title = pitems.playlist.title;
 					title = (title == '') ? 'Untitled playlist' : title;
 					title = title.replace(this.reg, '');
 					let list = JSON.parse(localStorage.getItem("playlists"+p.playerUID));
 					list = (list === null || list === undefined) ? [] : list;
 					let id = pitems.playlist.id;
 					if(!p.in_array2(id,list)){
-						list.push({"id":id,"title":title});
+						list.push({"id":id,"title":title,"data":pitems.playlist.data});
 						try{
-							let lists = JSON.stringify(list);
-							let list2 = localStorage.getItem("playlist"+p.playerUID);
-							if(list2){
-								let items = JSON.parse(list2);
-								let newvideos = items.concat(pitems.data);
-								var videos = JSON.stringify(newvideos);
-							}else{
-								var videos = JSON.stringify(pitems.data);
-							}
-							localStorage.setItem("playlists"+p.playerUID, lists);
-							localStorage.setItem("playlist"+p.playerUID, videos);
+							var videos = JSON.stringify(list);
+							localStorage.setItem("playlists"+p.playerUID, videos);
 							p.getPlaylists();
 							if(control == 'sidebar'){
 								p.getList(id);
@@ -167,7 +137,7 @@ var jpmplayer = {};
 						alert('This playlist already exists.');
 					}
 				}else {
-					if(pitems.playlist.length != 0)
+					if(pitems.playlists.length != 0)
 					{
 						this.importAll(pitems);
 					}else {
@@ -176,7 +146,7 @@ var jpmplayer = {};
 				}
 			}
 			catch(err){
-				alert('Sorry, could not import playlist. The data is corrupted. ' + err);
+				alert('Sorry, could not import playlist. The data is corrupted. ' + err + ' line 173');
 			}
 		}else {
 			if(control != 'sidebar'){
@@ -192,86 +162,57 @@ var jpmplayer = {};
 				}
 			}
 		}
-		return true;
 	}
 	p.export = function(listid) {
 		
+		if(typeof(Storage) === 'undefined') {
+			alert("Warning! You cannot export data, because your browser does not support storage.");
+		}
+		
 		let is_all = (listid === false) ? true : false;
-
+		let json = {};
 		let playlist = localStorage.getItem("playlists"+p.playerUID);
 		if(playlist){
 			//console.log(playlist);
-			let pitems = JSON.parse(playlist);
-			let total = (pitems.length - 1);
-			var plist = [];
-			let count = 0;
-			for(let i = total;0<=i;i--){
-				if(is_all){
-					plist[count] = {
-						"id":pitems[i].id,
-						"title":pitems[i].title
-					}
-					count++;					
-				}else {
-					if(pitems[i].id == listid){
+			try {
+				let pitems = JSON.parse(playlist);
+				let total = (pitems.length - 1);
+				var plist = [];
+				let count = 0;
+				for(let i = total;0<=i;i--){
+					if(is_all){
 						plist[count] = {
 							"id":pitems[i].id,
-							"title":pitems[i].title
+							"title":pitems[i].title,
+							"data":pitems[i].data
 						}
-						break;
+						count++;					
+					}else {
+						if(pitems[i].id == listid){
+							plist = {
+								"id":pitems[i].id,
+								"title":pitems[i].title,
+								"data":pitems[i].data
+							}
+							break;
+						}
 					}
 				}
-			}
-		}
-		let list = localStorage.getItem("playlist"+p.playerUID);
-		if(list){
-			let items = JSON.parse(list);
-			let total = (items.length - 1);
-			let count = 0;
-			let newList = [];
-			for(let i = total;0<=i;i--){
 				if(is_all){
-					newList[count] = {
-						"list":items[i].list,
-						"tld":items[i].tld,
-						"title":items[i].title,
-						"type":items[i].type,
-						"id":items[i].id
-					}
-					count++;
+					json = {"playlists":plist};
 				}else {
-					if(items[i].list == listid){
-						newList[count] = {
-							"list":items[i].list,
-							"tld":items[i].tld,
-							"title":items[i].title,
-							"type":items[i].type,
-							"id":items[i].id
-						}
-						count++;
-					}
+					json = {"playlist":plist};
 				}
 			}
-			
-			var liststring = JSON.stringify(newList);
-			let pliststring = {};
-			if(plist.length > 1){
-				pliststring = JSON.stringify(plist);
-			}else {
-				pliststring = JSON.stringify(plist[0]);
+			catch(err) {
+				alert('Sorry, could not export playlist. The data is corrupted. ' + err +' line 198');
 			}
-			liststring = '{"playlist":'+pliststring+',"data":'+liststring+'}';
-			
-		}else {
-			var liststring = JSON.stringify(new Array());
-			let pliststring = JSON.stringify(plist);
-			liststring = '{"playlist":'+pliststring+',"data":'+liststring+'}';
 		}
-	
+		
+		try {
+			let pliststring = JSON.stringify(json);
 			if(is_all){
-				
 				var input = document.getElementById('exported2');
-				
 			}else {
 				if(!document.getElementById('exported')){
 
@@ -290,12 +231,15 @@ var jpmplayer = {};
 				}
 			}
 			
-			input.innerHTML = liststring;
+			input.innerHTML = pliststring;
+			input.value = pliststring;
 			input.select();
 			input.setSelectionRange(0, 99999);
 			// document.execCommand("copy"); // not reliable!!
-			alert("Playlist(s) has been exported to the textarea.");	
-		
+			alert("Playlist(s) has been exported to the textarea.");
+		} catch(err) {
+			alert('Sorry, could not export playlist. The data is corrupted. ' + err);
+		}
 	}
 	// build 1.3 added
 	p.exportAll = function() {
@@ -316,7 +260,7 @@ var jpmplayer = {};
 			//let d = (new Date()).getTime();
 			let d = (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
 			if(!p.in_array2(d,list)){
-				list.push({"id":d,"title":title});
+				list.push({"id":d,"title":title,"data":[]});
 				try {
 					localStorage.setItem("playlists"+p.playerUID, JSON.stringify(list));
 				} catch (e) {
@@ -387,13 +331,23 @@ var jpmplayer = {};
 			loading.style.display = 'none';
 		}
 	}
-	p.getList  = function(listid,sort) {
+	p.getListById = function(list,listid) {
+		// list is all playlist data object, listid is the list you want to get
+		for(let i=0, len=list.length;i<len;i++) {
+			if (list[i].id == listid){
+				p.playlist = list[i];
+				return p.playlist;
+			}
+		}			
+	}
+	p.getList = function(listid,sort) {
 		if(typeof(Storage) !== 'undefined') {
-			let list = localStorage.getItem("playlist"+p.playerUID);
+			let list = localStorage.getItem("playlists"+p.playerUID);
 			if(list !== null && list !== undefined){
 				let row = '';
-				let items = JSON.parse(list);
-
+				list = JSON.parse(list);
+				let items = this.getListById(list,listid).data;
+				
 				if(typeof(sort) !== 'undefined') {
 					if(sort == 'a-z'){
 						items.sort(function(a, b){
@@ -419,7 +373,7 @@ var jpmplayer = {};
 						})
 					}
 				}
-				console.log(items,'2');
+				console.log(items);
 				let total = (items.length - 1);
 				let count = 0;
 				let lasti = 0;
@@ -432,7 +386,7 @@ var jpmplayer = {};
 							//img = '<img src="https://i.ytimg.com/vi/'+items[i].id+'/hqdefault.jpg" alt="" style="width:100px;height:auto" />'
 							//<div class="videoimg">'+img+'</div>
 						}
-						 row += '<div class="playlist-item"><a href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',this)"></span></div>';
+						 row += '<div class="playlist-item"><a href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',\''+listid+'\',this)"></span></div>';
 						 if(count == 0){
 							lasti = i;
 						 }
@@ -457,62 +411,61 @@ var jpmplayer = {};
 		}
 		return false;
 	}
+	// changed v2
 	p.in_array = function(needle, haystack, listid){
 		let found = 0;
 		for(let i=0, len=haystack.length;i<len;i++) {
-			if (haystack[i].id == needle && haystack[i].list == listid) return true;
+			if (haystack[i].id == listid){
+				//console.log(haystack[i].data);
+				for(let x=0,len=haystack[i].data.length;x<len;x++) {
+					if (haystack[i].data[x].id == needle){ 
+						return true;
+					}
+				}
+			}
 		}
 		return false;
 	}
 	p.removeList = function(listid,elem) {
 		elem.parentElement.remove();
 		if(typeof(Storage) !== 'undefined') {
-			// fixed bug in build 1
-			let playlist = localStorage.getItem("playlist"+p.playerUID);
-			if(playlist){
-				let pitems = JSON.parse(playlist);
-				let newList = []
-				for(let i = 0;pitems.length>i;i++){
-					if(pitems[i].list == listid)
-					{
-						console.log(pitems[i],listid,'removed');
-					}else {
-						newList.push(pitems[i]);
-					}
-				}
-				console.log(newList);
-				localStorage.setItem("playlist"+p.playerUID, JSON.stringify(newList));
-			}
-
 			let list = localStorage.getItem("playlists"+p.playerUID);
 			if(list){
-				let items = JSON.parse(list);
-				for(let i = 0;items.length>i;i++){
-					if(items[i].id == listid)
-					{
-						//console.log(items[i]);
-						items.splice(i, 1);
+				list = JSON.parse(list);
+				console.log(list);
+				for(let x=0, len=list.length;x<len;x++) {
+					if(list[x].id == listid){
+						console.log(list[x]);
+						list.splice(x, 1);
+						break;
 					}
 				}
-				localStorage.setItem("playlists"+p.playerUID, JSON.stringify(items));
+				localStorage.setItem("playlists"+p.playerUID, JSON.stringify(list));
 			}
 		}
 	}
-	p.removeItem = function(item,elem) {
+	p.removeItem = function(item,listid,elem) {
 		elem.parentElement.remove();
 		if(typeof(Storage) !== 'undefined') {
-			let list = localStorage.getItem("playlist"+p.playerUID);
+			let list = localStorage.getItem("playlists"+p.playerUID);
 			if(list){
-				let items = JSON.parse(list);
-				for(let i = 0;items.length>i;i++){
-					if(items[i].id == item)
-					{
-						console.log(items[i])
-						items.splice(i, 1);
+				list = JSON.parse(list);
+				for(let x=0, len=list.length;x<len;x++) {
+					if(list[x].id == listid){
+						let items = list[x].data;
+						console.log(items);
+						for(let i = 0;items.length>i;i++){
+							if(items[i].id == item)
+							{
+								console.log(items[i])
+								items.splice(i, 1);
+							}
+						}
+						console.log(items);
+						list[x].data = items;
 					}
 				}
-				localStorage.setItem("playlist"+p.playerUID, JSON.stringify(items));
-				console.log(items);
+				localStorage.setItem("playlists"+p.playerUID, JSON.stringify(list));
 			}
 		}
 	}
@@ -525,20 +478,36 @@ var jpmplayer = {};
 			document.getElementById("addform").style.display = 'block';
 		}
 	}
+	// added v2
+	p.insertData = function(data,list,listid){
+		for(let i=0, len=list.length;i<len;i++) {
+			if (list[i].id == listid){
+				list[i].data.push(data);
+				p.playlist = list[i];
+			}
+		}
+		try {
+			localStorage.setItem("playlists"+p.playerUID, JSON.stringify(list));
+		} catch (e) {
+			if (e == QUOTA_EXCEEDED_ERR || e.code === "22" || e.code === "1024") {
+				alert('Local storage is full. Please remove old playlist videos to add new ones.');
+			}
+		}		
+	}
     p.addItem = function(listid) {
 		if(typeof(Storage) !== 'undefined') {
 			let list = [];
+			let dt = (new Date()).getTime();
 			//let url = prompt("Enter video URL:");
 			let urlinput = document.getElementById("videourl");
 			let url = urlinput.value;
 			// for debugging ... do not uncomment
-			//url = 'http://www.youtube.com/x2-' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
+			// url = 'http://www.youtube.com/x2-' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
 			if(url != null && url != ''){
 				if(url.indexOf('&') > -1){
 					var spliturl = url.split('&');
 					url = spliturl[0];
 				}
-
 				url = url.replace(this.urlreg, '');
 				//let title = prompt("Enter video title:");
 				let titleinput = document.getElementById("videotitle");
@@ -549,23 +518,17 @@ var jpmplayer = {};
 					title = title.replace(this.reg, '');
 				}
 				let matches = url.match(this.regmatch);
-				if(localStorage.getItem("playlist"+p.playerUID)){
-					list = JSON.parse(localStorage.getItem("playlist"+p.playerUID));
+				
+				if(localStorage.getItem("playlists"+p.playerUID)){
+					list = JSON.parse(localStorage.getItem("playlists"+p.playerUID));
 				}
-				console.log(list);
+
 				if(matches != null) {
 					let vid = matches[5].replace(/\/$/, "");
 					let type = matches[2];
-					let tld = matches[3];
+					let tld = matches[3];					
 					if(!p.in_array(vid,list,listid)){
-						list.push({"id":vid,"title":title,"type":type,"list":listid,"tld":tld});
-						try {
-							localStorage.setItem("playlist"+p.playerUID, JSON.stringify(list));
-						} catch (e) {
-							if (e == QUOTA_EXCEEDED_ERR || e.code === "22" || e.code === "1024") {
-								alert('Local storage is full. Please remove old playlist videos to add new ones.');
-							}
-						}
+						this.insertData({"id":vid,"title":title,"type":type,"list":listid,"tld":tld,"date":dt},list,listid);
 						urlinput.value = '';
 						titleinput.value = '';
 					}else {
@@ -578,14 +541,7 @@ var jpmplayer = {};
 						let type = matches[2];
 						let tld = matches[3];
 						if(!p.in_array(vid,list,listid)){
-							list.push({"id":vid,"title":title,"type":type,"list":listid,"tld":tld});
-							try {
-								localStorage.setItem("playlist"+p.playerUID, JSON.stringify(list));
-							} catch (e) {
-								if (e == QUOTA_EXCEEDED_ERR || e.code === "22" || e.code === "1024") {
-									alert('Local storage is full. Please remove old playlist videos to add new ones.');
-								}
-							}
+							this.insertData({"id":vid,"title":title,"type":type,"list":listid,"tld":tld,"date":dt},list,listid);
 							urlinput.value = '';
 							titleinput.value = '';
 						}else {
