@@ -7,9 +7,11 @@
 		<meta http-equiv="expires" content="-1" />
 		<meta content="width=device-width, initial-scale=1" name="viewport" />
 		<title>JPMalloy.com</title>
+		<!-- Start of playlists code -->
 		<link rel="stylesheet" type="text/css" href="src/pop6.css" />
 		<script type="text/javascript" src="src/pop6.js"></script>
 		<script type="text/javascript" src="src/playlist.js"></script>
+		<!-- End of playlists code -->
 	</head>
 <body>
 <header>
@@ -18,13 +20,18 @@
 <section>
 	<h2>News</h2><p>Version 2 is here.</p>
 	<h2>Example</h2>
-	<button onclick="jpmplayer.createPlaylist()">Create Playlist</button> &nbsp; <button onclick="javascript:jpmplayer.import('create','main')" id="importbutton2">Import</button> &nbsp; <button onclick="javascript:jpmplayer.exportAll()">Export All</button>
+	
+	<!-- Start of playlists code -->
+	<button onclick="jpmplayer.createPlaylist()">Create Playlist</button> &nbsp; <button onclick="jpmplayer.outputHTML('main')" id="importbutton2">Import</button> &nbsp; <button onclick="jpmplayer.exportAll()">Export All</button>
 	<div id="mainimport"></div>
 	<div id="yourlists"></div>
+	<!-- End of playlists code -->
+	
 	<h2>Download</h2>
-	<p><a href="jpmplaylist2.zip" download="jpmplaylist.zip">Version 2</a></p>
+	<p><a href="jpmplaylist2.zip" download="jpmplaylist2.zip">Version 2</a></p>
 	<p style="text-align:center;">Copyright &copy; 2020 - 2021 James P. Malloy All Rights Reserved.</p>
 </section>
+<!-- Start of playlists code -->
 <script>
 	var jpmx2 = new jpmpopup({
 		'container':'popup-container',
@@ -34,8 +41,8 @@
 	function popUp(id){
 		//allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 		jpmx2.item = {
-		'id':'1','type':'','file':'',
-		'html':'<div class="wrap-container"><div class="left-column" id="left-column"><iframe width="760" height="515" src="" style="max-width:100%;max-height:100%;" frameborder="0" id="videoframe" allowfullscreen></iframe></div><div class="right-column" id="right-column"><div id="sidebarlist"><button onclick="jpmplayer.addForm(\'add\')" id="addform">Add Videos</button><div id="addvideoform"><form method="post" action="" onsubmit="return false;"><div><input type="text" placeholder="Video Title" id="videotitle" /></div><div><input type="text" placeholder="Video URL" id="videourl" /></div><button onclick="jpmplayer.addItem(\''+id+'\')">Add Video</button> &nbsp; <button onclick="jpmplayer.addForm(\'done\')">Done</button></form></div><div id="playlist"></div></div></div>'
+			'id':'1','type':'','file':'',
+			'html':'<div class="wrap-container"><div class="left-column" id="left-column"><iframe width="760" height="515" src="" style="max-width:100%;max-height:100%;" frameborder="0" id="videoframe" allowfullscreen></iframe></div><div class="right-column" id="right-column"><div id="sidebarlist"><button onclick="jpmplayer.addForm(\'add\')" id="addform">Add Videos</button><div id="addvideoform"><form method="post" action="" onsubmit="return false;"><div><input type="text" placeholder="Video Title" id="videotitle" /></div><div><input type="text" placeholder="Video URL" id="videourl" /></div><button onclick="jpmplayer.addItem(\''+id+'\')">Add Video</button> &nbsp; <button onclick="jpmplayer.addForm(\'done\')">Done</button></form></div><div id="playlist"></div></div></div>'
 		};
 		jpmx2.container = 'player1';
 		jpmx2.style = 'width:100%;z-index:5;background-color:rgba(0, 0, 0, 0.9)';
@@ -46,5 +53,6 @@
 	}
 	jpmplayer.getPlaylists();
 </script>
+<!-- End of playlists code -->
 </body>
 </html>
