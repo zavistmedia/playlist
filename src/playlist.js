@@ -21,7 +21,7 @@ To-do Notes:
 in the future all alerts will be replaced with a custom alert box
 data input checks will be improved for import option
 clean up code, create error handling function etc
-create seperate function for HTML interface creation etc... a controller
+create separate function for HTML interface creation etc... a controller
 */
 
 'use strict';
