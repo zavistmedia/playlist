@@ -45,6 +45,7 @@ var jpmplayer = {};
 					if(!p.in_array2(id,list)){
 						// playlist not in existing array, add it
 						list.push({"id":id,"title":title,"data":pitems.playlists[i].data});
+						document.getElementById("yourlists").style.display = "block";
 					}else {
 						alert('Could not add playlist '+title+' ('+id+'), because it already exists.');
 					}
@@ -64,7 +65,7 @@ var jpmplayer = {};
 		}
 	}
 	p.import = function(mode,control) {
-		
+
 		if(typeof(Storage) === 'undefined') {
 			alert("Warning! You cannot import data, because your browser does not support storage.");
 		}
@@ -129,6 +130,7 @@ var jpmplayer = {};
 							}else {
 								document.getElementById('mainimport').innerHTML = '';
 							}
+							document.getElementById("yourlists").style.display = "block";
 						}
 						catch(err) {
 							alert('Sorry, could not import playlist. The data is corrupted. ' + err);
@@ -146,7 +148,7 @@ var jpmplayer = {};
 				}
 			}
 			catch(err){
-				alert('Sorry, could not import playlist. The data is corrupted. ' + err + ' line 173');
+				alert('Sorry, could not import playlist. The data is corrupted. ' + err + ' line 149');
 			}
 		}else {
 			if(control != 'sidebar'){
@@ -164,11 +166,11 @@ var jpmplayer = {};
 		}
 	}
 	p.export = function(listid) {
-		
+
 		if(typeof(Storage) === 'undefined') {
 			alert("Warning! You cannot export data, because your browser does not support storage.");
 		}
-		
+
 		let is_all = (listid === false) ? true : false;
 		let json = {};
 		let playlist = localStorage.getItem("playlists"+p.playerUID);
@@ -186,7 +188,7 @@ var jpmplayer = {};
 							"title":pitems[i].title,
 							"data":pitems[i].data
 						}
-						count++;					
+						count++;
 					}else {
 						if(pitems[i].id == listid){
 							plist = {
@@ -205,10 +207,10 @@ var jpmplayer = {};
 				}
 			}
 			catch(err) {
-				alert('Sorry, could not export playlist. The data is corrupted. ' + err +' line 198');
+				alert('Sorry, could not export playlist. The data is corrupted. ' + err +' line 208');
 			}
 		}
-		
+
 		try {
 			let pliststring = JSON.stringify(json);
 			if(is_all){
@@ -230,7 +232,7 @@ var jpmplayer = {};
 					var input = document.getElementById('exported');
 				}
 			}
-			
+
 			input.innerHTML = pliststring;
 			input.value = pliststring;
 			input.select();
@@ -248,6 +250,7 @@ var jpmplayer = {};
 	}
 	p.createPlaylist = function() {
 		let list = [];
+		if(typeof(Storage) !== 'undefined') {
 		document.getElementById('mainimport').innerHTML = '';
 		document.getElementById('importbutton2').innerHTML = 'Import';
 		let title = prompt("Enter a title for this playlist:");
@@ -270,7 +273,11 @@ var jpmplayer = {};
 				}
 				p.getPlaylists();
 				console.log(list);
+				document.getElementById("yourlists").style.display = "block";
 			}
+		}
+		}else {
+			alert("Sorry, your browser does not support Local Storage. Please update your browser or allow local storage.");
 		}
 	}
 	p.sortList = function(listid,sort) {
@@ -287,9 +294,16 @@ var jpmplayer = {};
 					console.log(items[i]);
 					row += '<div class="yourlists-item"><a href="javascript:popUp(\''+items[i].id+'\')">'+items[i].title+'</a> <span class="removelist" onclick="javascript:jpmplayer.removeList(\''+items[i].id+'\',this)"></span></div>';
 				}
-				row += '<div class="yourlists-item"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:12px;color:#ccc">Powered by JPM Playlist</a></div>';
 				let playlists = document.getElementById("yourlists");
-				playlists.style.display = "block";
+				if(total < 0){
+					playlists.style.display = "none";
+				}else {
+					
+					// this line is optional for version 2, the other credit line cannot be removed
+					// credit back welcomed here
+					row += '<div class="yourlists-item"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:11px;color:#ccc">Powered by JPM Playlist</a></div>';
+					playlists.style.display = "block";
+				}
 				playlists.innerHTML = row;
 			}
 		}else {
@@ -338,7 +352,7 @@ var jpmplayer = {};
 				p.playlist = list[i];
 				return p.playlist;
 			}
-		}			
+		}
 	}
 	p.getList = function(listid,sort) {
 		if(typeof(Storage) !== 'undefined') {
@@ -347,7 +361,7 @@ var jpmplayer = {};
 				let row = '';
 				list = JSON.parse(list);
 				let items = this.getListById(list,listid).data;
-				
+
 				if(typeof(sort) !== 'undefined') {
 					if(sort == 'a-z'){
 						items.sort(function(a, b){
@@ -367,6 +381,28 @@ var jpmplayer = {};
 								return -1
 							}
 							if(titleA > titleB){
+								return 1
+							}
+							return 0
+						})
+					}else if(sort == 'old'){
+						items.sort(function(a, b){
+							var dateA = a.date, dateB = b.date;
+							if(dateA > dateB){
+								return -1
+							}
+							if(dateA < dateB){
+								return 1
+							}
+							return 0
+						})
+					}else if(sort == ''){
+						items.sort(function(a, b){
+							var dateA = a.date, dateB = b.date;
+							if(dateA < dateB){
+								return -1
+							}
+							if(dateA > dateB){
 								return 1
 							}
 							return 0
@@ -396,7 +432,7 @@ var jpmplayer = {};
 				count--;
 
 				row += '<div class="playlist-item"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:12px;color:#ccc">Powered by JPM Playlist</a></div>';
-				document.getElementById("playlist").innerHTML = '<div style="margin-bottom:20px"><a href="javascript:jpmplayer.sortList(\''+listid+'\',\'a-z\')">A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'z-a\')">Z-A</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'\')">Newest</a></div><div id="jpmplayer">' + row + '</div><div style="margin-top:20px"><a href="javascript:jpmplayer.export(\''+listid+'\')">Export</a> &nbsp; <a href="javascript:jpmplayer.import(\'create\',\'sidebar\')">Import</a></div>';
+				document.getElementById("playlist").innerHTML = '<div style="margin-bottom:20px"><a href="javascript:jpmplayer.sortList(\''+listid+'\',\'a-z\')">A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'z-a\')">Z-A</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'\')">Newest</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'old\')">Oldest</a></div><div id="jpmplayer">' + row + '</div><div style="margin-top:20px"><a href="javascript:jpmplayer.export(\''+listid+'\')">Export</a> &nbsp; <a href="javascript:jpmplayer.import(\'create\',\'sidebar\')">Import</a></div>';
 
 				if(has_videos){
 					this.playVideo(''+items[lasti].id+'',''+items[lasti].type+'',''+items[lasti].tld+'','video-'+lasti,false);
@@ -418,7 +454,7 @@ var jpmplayer = {};
 			if (haystack[i].id == listid){
 				//console.log(haystack[i].data);
 				for(let x=0,len=haystack[i].data.length;x<len;x++) {
-					if (haystack[i].data[x].id == needle){ 
+					if (haystack[i].data[x].id == needle){
 						return true;
 					}
 				}
@@ -432,13 +468,16 @@ var jpmplayer = {};
 			let list = localStorage.getItem("playlists"+p.playerUID);
 			if(list){
 				list = JSON.parse(list);
-				console.log(list);
+				//console.log(list);
 				for(let x=0, len=list.length;x<len;x++) {
 					if(list[x].id == listid){
 						console.log(list[x]);
 						list.splice(x, 1);
 						break;
 					}
+				}
+				if(list.length == 0){
+					document.getElementById("yourlists").style.display = "none";
 				}
 				localStorage.setItem("playlists"+p.playerUID, JSON.stringify(list));
 			}
@@ -492,7 +531,7 @@ var jpmplayer = {};
 			if (e == QUOTA_EXCEEDED_ERR || e.code === "22" || e.code === "1024") {
 				alert('Local storage is full. Please remove old playlist videos to add new ones.');
 			}
-		}		
+		}
 	}
     p.addItem = function(listid) {
 		if(typeof(Storage) !== 'undefined') {
@@ -518,7 +557,7 @@ var jpmplayer = {};
 					title = title.replace(this.reg, '');
 				}
 				let matches = url.match(this.regmatch);
-				
+
 				if(localStorage.getItem("playlists"+p.playerUID)){
 					list = JSON.parse(localStorage.getItem("playlists"+p.playerUID));
 				}
@@ -526,7 +565,7 @@ var jpmplayer = {};
 				if(matches != null) {
 					let vid = matches[5].replace(/\/$/, "");
 					let type = matches[2];
-					let tld = matches[3];					
+					let tld = matches[3];
 					if(!p.in_array(vid,list,listid)){
 						this.insertData({"id":vid,"title":title,"type":type,"list":listid,"tld":tld,"date":dt},list,listid);
 						urlinput.value = '';
