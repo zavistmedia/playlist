@@ -45,6 +45,16 @@ var jpmplayer = {};
 					if(!p.in_array2(id,list)){
 						// playlist not in existing array, add it
 						list.push({"id":id,"title":title,"data":pitems.playlists[i].data});
+						if(document.getElementById("exported2")){
+							let exported2 = document.getElementById("exported2");
+							exported2.value = '';
+							exported2.innerHTML = '';
+						}
+						if(document.getElementById("exported")){
+							let exported = document.getElementById("exported");
+							exported.value = '';
+							exported.innerHTML = '';
+						}
 						document.getElementById("yourlists").style.display = "block";
 					}else {
 						alert('Could not add playlist '+title+' ('+id+'), because it already exists.');
@@ -57,19 +67,14 @@ var jpmplayer = {};
 						alert('Local storage is full. Please remove old playlist videos to add new ones.');
 					}
 				}
-				document.getElementById('mainimport').innerHTML = '';
 				p.getPlaylists();
 			}catch(err) {
 				alert('Sorry, could not import playlist. The data is corrupted. ' + err);
 			}
 		}
 	}
-	p.import = function(mode,control) {
-
-		if(typeof(Storage) === 'undefined') {
-			alert("Warning! You cannot import data, because your browser does not support storage.");
-		}
-
+	p.outputHTML = function(control) {
+		
 		if(control == 'main'){
 			var boxname = 'exported2';
 			var buttonname = 'importbutton2';
@@ -92,9 +97,9 @@ var jpmplayer = {};
 
 			var button = document.createElement('button');
 			if(control == 'sidebar'){
-				button.setAttribute('onclick','javascript:jpmplayer.import(\'ini\',\'sidebar\')');
+				button.setAttribute('onclick','javascript:jpmplayer.import(\'sidebar\')');
 			}else{
-				button.setAttribute('onclick','javascript:jpmplayer.import(\'ini\',\'main\')');
+				button.setAttribute('onclick','javascript:jpmplayer.import(\'main\')');
 			}
 			button.setAttribute('id',buttonname);
 			if(control == 'sidebar'){
@@ -104,65 +109,80 @@ var jpmplayer = {};
 			}
 			button.innerHTML = 'Import';
 			document.getElementById(local).appendChild(button);
+		}		
+		
+		if(control != 'sidebar'){
+			let importbutton = document.getElementById(buttonname);
+			let importbox = document.getElementById(local);
+			let importbuttonval = importbutton.innerHTML.toLowerCase();
+			if(importbuttonval == 'import'){
+				importbox.style.display = 'block';
+				importbutton.innerHTML = 'Close Import';
+			}else {
+				importbox.style.display = 'none';
+				importbutton.innerHTML = 'Import';
+			}
 		}
-
-		if(mode != 'create'){
-			let input = document.getElementById(boxname);
-			let liststring = input.value;
-			try{
-				let pitems = JSON.parse(liststring);
-				if(pitems.playlist !== undefined){
-					let title = pitems.playlist.title;
-					title = (title == '') ? 'Untitled playlist' : title;
-					title = title.replace(this.reg, '');
-					let list = JSON.parse(localStorage.getItem("playlists"+p.playerUID));
-					list = (list === null || list === undefined) ? [] : list;
-					let id = pitems.playlist.id;
-					if(!p.in_array2(id,list)){
-						list.push({"id":id,"title":title,"data":pitems.playlist.data});
-						try{
-							var videos = JSON.stringify(list);
-							localStorage.setItem("playlists"+p.playerUID, videos);
-							p.getPlaylists();
-							if(control == 'sidebar'){
-								p.getList(id);
-								document.getElementById('mainimport').innerHTML = '';
-							}else {
-								document.getElementById('mainimport').innerHTML = '';
-							}
-							document.getElementById("yourlists").style.display = "block";
-						}
-						catch(err) {
-							alert('Sorry, could not import playlist. The data is corrupted. ' + err);
-						}
-					}else {
-						alert('This playlist already exists.');
-					}
-				}else {
-					if(pitems.playlists.length != 0)
-					{
-						this.importAll(pitems);
-					}else {
-						alert('No playlists found.');
-					}
-				}
-			}
-			catch(err){
-				alert('Sorry, could not import playlist. The data is corrupted. ' + err + ' line 149');
-			}
+	}
+	p.import = function(control) {
+		if(typeof(Storage) === 'undefined') {
+			alert("Warning! You cannot import data, because your browser does not support storage.");
+		}
+		if(control == 'main'){
+			var boxname = 'exported2';
+			var buttonname = 'importbutton2';
+			var local = 'mainimport';
 		}else {
-			if(control != 'sidebar'){
-				let importbutton = document.getElementById(buttonname);
-				let importbox = document.getElementById(local);
-				let importbuttonval = importbutton.innerHTML.toLowerCase();
-				if(importbuttonval == 'import'){
-					importbox.style.display = 'block';
-					importbutton.innerHTML = 'Close Import';
+			var boxname = 'exported';
+			var buttonname = 'importbutton';
+			var local = 'sidebarlist';
+		}
+		let input = document.getElementById(boxname);
+		let liststring = input.value;
+		try{
+			let pitems = JSON.parse(liststring);
+			if(pitems.playlist !== undefined){
+				let title = pitems.playlist.title;
+				title = (title == '') ? 'Untitled playlist' : title;
+				title = title.replace(this.reg, '');
+				let list = JSON.parse(localStorage.getItem("playlists"+p.playerUID));
+				list = (list === null || list === undefined) ? [] : list;
+				let id = pitems.playlist.id;
+				if(!p.in_array2(id,list)){
+					list.push({"id":id,"title":title,"data":pitems.playlist.data});
+					try{
+						var videos = JSON.stringify(list);
+						localStorage.setItem("playlists"+p.playerUID, videos);
+						p.getPlaylists();
+						if(control == 'sidebar'){
+							p.getList(id);
+							let exported = document.getElementById("exported");
+							exported.value = '';
+							exported.innerHTML = '';
+						}else {
+							let exported2 = document.getElementById("exported2");
+							exported2.value = '';
+							exported2.innerHTML = '';
+						}
+						document.getElementById("yourlists").style.display = "block";
+					}
+					catch(err) {
+						alert('Sorry, could not import playlist. The data is corrupted. ' + err);
+					}
 				}else {
-					importbox.style.display = 'none';
-					importbutton.innerHTML = 'Import';
+					alert('This playlist already exists.');
+				}
+			}else {
+				if(pitems.playlists.length != 0)
+				{
+					this.importAll(pitems);
+				}else {
+					alert('No playlists found.');
 				}
 			}
+		}
+		catch(err){
+			alert('Sorry, could not import playlist. The data is corrupted. ' + err + ' line 164');
 		}
 	}
 	p.export = function(listid) {
@@ -170,7 +190,6 @@ var jpmplayer = {};
 		if(typeof(Storage) === 'undefined') {
 			alert("Warning! You cannot export data, because your browser does not support storage.");
 		}
-
 		let is_all = (listid === false) ? true : false;
 		let json = {};
 		let playlist = localStorage.getItem("playlists"+p.playerUID);
@@ -223,7 +242,7 @@ var jpmplayer = {};
 					document.getElementById('sidebarlist').appendChild(input);
 
 					var button = document.createElement('button');
-					button.setAttribute('onclick','javascript:jpmplayer.import(\'ini\',\'sidebar\')');button.setAttribute('id','importbutton');
+					button.setAttribute('onclick','javascript:jpmplayer.import(\'sidebar\')');button.setAttribute('id','importbutton');
 					button.setAttribute('style','margin-top:20px;width:auto');
 					button.innerHTML = 'Import';
 					document.getElementById('sidebarlist').appendChild(button);
@@ -245,13 +264,13 @@ var jpmplayer = {};
 	}
 	// build 1.3 added
 	p.exportAll = function() {
-		this.import('create','main');
+		this.outputHTML('main');
 		this.export(false);
 	}
 	p.createPlaylist = function() {
 		let list = [];
 		if(typeof(Storage) !== 'undefined') {
-		document.getElementById('mainimport').innerHTML = '';
+		
 		document.getElementById('importbutton2').innerHTML = 'Import';
 		let title = prompt("Enter a title for this playlist:");
 		if(title != null){
@@ -432,7 +451,7 @@ var jpmplayer = {};
 				count--;
 
 				row += '<div class="playlist-item"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:12px;color:#ccc">Powered by JPM Playlist</a></div>';
-				document.getElementById("playlist").innerHTML = '<div style="margin-bottom:20px"><a href="javascript:jpmplayer.sortList(\''+listid+'\',\'a-z\')">A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'z-a\')">Z-A</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'\')">Newest</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'old\')">Oldest</a></div><div id="jpmplayer">' + row + '</div><div style="margin-top:20px"><a href="javascript:jpmplayer.export(\''+listid+'\')">Export</a> &nbsp; <a href="javascript:jpmplayer.import(\'create\',\'sidebar\')">Import</a></div>';
+				document.getElementById("playlist").innerHTML = '<div style="margin-bottom:20px"><a href="javascript:jpmplayer.sortList(\''+listid+'\',\'a-z\')">A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'z-a\')">Z-A</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'\')">Newest</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'old\')">Oldest</a></div><div id="jpmplayer">' + row + '</div><div style="margin-top:20px"><a href="javascript:jpmplayer.export(\''+listid+'\')">Export</a> &nbsp; <a href="javascript:jpmplayer.outputHTML(\'sidebar\')">Import</a></div>';
 
 				if(has_videos){
 					this.playVideo(''+items[lasti].id+'',''+items[lasti].type+'',''+items[lasti].tld+'','video-'+lasti,false);
