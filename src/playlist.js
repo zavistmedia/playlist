@@ -27,11 +27,21 @@ create separate function for HTML interface creation etc... a controller
 'use strict';
 var jpmplayer = {};
 (function(p){
+	const debug = false;
+	window.onload = function() {
+		p.docHeight = window.document.body.clientHeight;
+		p.docWidth = window.document.body.clientWidth;
+		p.ini();
+	};
+	p.ini = (p.ini !== undefined) ? p.ini : function(){};
+	p.serverURL = (p.serverURL !== undefined) ? p.serverURL : 'https://www.{domain}/embed/{vid}{query}';
 	p.playerUID = 'X2';
+	p.iframeReplace = "https://www.{domain}/embed/{vid}{query}";
+	p.iframeURL = '';
 	p.playlist = {};
 	p.reg = /[^A-Za-z0-9,‘’”“'"*$#^+!()=?&:/_.-\s]/g;
 	p.urlreg = /[^A-Za-z0-9'"*$#^+!()=?&:/_.-]/g;
-	p.regmatch =/(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i;
+	p.regmatch = (p.regmatch !== undefined) ? p.regmatch :/(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i;
 	p.regmatch2 = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(.+)/i;
 	p.importAll = function(pitems) {
 		if(localStorage.getItem("playlists"+p.playerUID)){
@@ -190,7 +200,7 @@ var jpmplayer = {};
 		if(typeof(Storage) === 'undefined') {
 			alert("Warning! You cannot export data, because your browser does not support storage.");
 		}
-		let is_all = (listid === false) ? true : false;
+		const is_all = (listid === false) ? true : false;
 		let json = {};
 		let playlist = localStorage.getItem("playlists"+p.playerUID);
 		if(playlist){
@@ -332,7 +342,11 @@ var jpmplayer = {};
 		}
 	}
 	p.playVideo = function (vid,domain,tld,clicked,autoplay) {
+		
+		this.docHeight = window.document.body.clientHeight;
+		this.docWidth = window.document.body.clientWidth;
 		// auto play is set for YT... may not work if YT blocks
+		// this will be integrated into the jpmpopup in the future
 		let cssclicked = document.querySelector('.clickeditem');
 		if(cssclicked !== null && cssclicked !== undefined){
 			cssclicked.setAttribute('class','visiteditem');
@@ -347,8 +361,32 @@ var jpmplayer = {};
 		if(autoplay){
 			extend = (embed == 'youtube.com' || embed == 'bitchute.com' || embed == 'dailymotion.com') ? symbol +'autoplay=1' : '';
 		}
-
-		video.src = "https://www."+embed+"/embed/"+vid+extend;
+		
+		let newurl = this.serverURL;
+		newurl = newurl.replace('{query}',extend);
+		newurl = newurl.replace('{vid}',vid);
+		this.iframeURL = newurl.replace('{domain}',embed);
+		
+		//this.iframeURL = "https://www."+embed+"/embed/"+vid+extend;
+		
+		if(!debug){
+			video.src = this.iframeURL;
+		}
+		if(debug){
+			if(!document.getElementById('itemstats')){
+				// future design maybe
+				var stats = document.createElement('div');
+				stats.setAttribute('class','itemstats');
+				stats.setAttribute('id','itemstats');
+				stats.style.display = 'block';
+				stats.innerHTML = this.iframeURL;
+				leftface.appendChild(stats);
+			}else {
+				var stats = document.getElementById('itemstats');
+				stats.style.display = 'block';
+				stats.innerHTML = this.iframeURL;
+			}
+		}
 		if(!document.getElementById('loadingdiv')){
 			var loading = document.createElement('div');
 			loading.setAttribute('class','loading');
@@ -358,10 +396,14 @@ var jpmplayer = {};
 		}else {
 			var loading = document.getElementById('loadingdiv');
 		}
-
-		loading.style.display = 'block';
-		video.onload = function () {
-			loading.style.display = 'none';
+		if(this.docWidth < 480){
+			document.body.scrollTop = document.documentElement.scrollTop = 0;
+		}
+		if(!debug){
+			loading.style.display = 'block';
+			video.onload = function () {
+				loading.style.display = 'none';
+			}
 		}
 	}
 	p.getListById = function(list,listid) {
@@ -537,7 +579,7 @@ var jpmplayer = {};
 		}
 	}
 	// added v2
-	p.insertData = function(data,list,listid){
+	const insertData = function(data,list,listid){
 		for(let i=0, len=list.length;i<len;i++) {
 			if (list[i].id == listid){
 				list[i].data.push(data);
@@ -560,7 +602,9 @@ var jpmplayer = {};
 			let urlinput = document.getElementById("videourl");
 			let url = urlinput.value;
 			// for debugging ... do not uncomment
-			// url = 'http://www.youtube.com/x2-' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
+			if(debug){
+				url = 'http://www.youtube.com/' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
+			}
 			if(url != null && url != ''){
 				if(url.indexOf('&') > -1){
 					var spliturl = url.split('&');
@@ -586,7 +630,7 @@ var jpmplayer = {};
 					let type = matches[2];
 					let tld = matches[3];
 					if(!p.in_array(vid,list,listid)){
-						this.insertData({"id":vid,"title":title,"type":type,"list":listid,"tld":tld,"date":dt},list,listid);
+						insertData({"id":vid,"title":title,"type":type,"list":listid,"tld":tld,"date":dt},list,listid);
 						urlinput.value = '';
 						titleinput.value = '';
 					}else {
@@ -599,7 +643,7 @@ var jpmplayer = {};
 						let type = matches[2];
 						let tld = matches[3];
 						if(!p.in_array(vid,list,listid)){
-							this.insertData({"id":vid,"title":title,"type":type,"list":listid,"tld":tld,"date":dt},list,listid);
+							insertData({"id":vid,"title":title,"type":type,"list":listid,"tld":tld,"date":dt},list,listid);
 							urlinput.value = '';
 							titleinput.value = '';
 						}else {
