@@ -4,7 +4,7 @@
  // http://www.jpmalloy.com
  // james (@) jpmalloy.com
  // Credit must stay intact for legal use
- // Version 2 (build "1.1")
+ // Version 2 (build "1.2")
  // *** 100% free, do with what you like with credit back ***
  // No outside plugins required
  // Feel free to share with others
@@ -28,21 +28,23 @@ create separate function for HTML interface creation etc... a controller
 var jpmplayer = {};
 (function(p){
 	const debug = false;
-	window.onload = function() {
+	p.ini = function(set){
+		p.regmatch = (set.regmatch !== undefined) ? set.regmatch :/(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i;
+	p.regmatch2 = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(.+)/i;
+		p.getPlaylist = (set.getPlaylist !== undefined) ? set.getPlaylist : function(id){alert('No popup interface defined for '+id+'.')};
+		p.onPlay = (set.onPlay !== undefined) ? set.onPlay : function(id){};
+		p.serverURL = (set.serverURL !== undefined) ? set.serverURL : 'https://www.{domain}/embed/{vid}{query}';	
 		p.docHeight = window.document.body.clientHeight;
 		p.docWidth = window.document.body.clientWidth;
-		p.ini();
-	};
-	p.ini = (p.ini !== undefined) ? p.ini : function(){};
-	p.serverURL = (p.serverURL !== undefined) ? p.serverURL : 'https://www.{domain}/embed/{vid}{query}';
+		p.getPlaylists();		
+	}
 	p.playerUID = 'X2';
-	p.iframeReplace = "https://www.{domain}/embed/{vid}{query}";
+	p.iframeReplace = 'https://www.{domain}/embed/{vid}{query}';
 	p.iframeURL = '';
+	p.domain = '';
 	p.playlist = {};
 	p.reg = /[^A-Za-z0-9,‘’”“'"*$#^+!()=?&:/_.-\s]/g;
 	p.urlreg = /[^A-Za-z0-9'"*$#^+!()=?&:/_.-]/g;
-	p.regmatch = (p.regmatch !== undefined) ? p.regmatch :/(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i;
-	p.regmatch2 = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(.+)/i;
 	p.importAll = function(pitems) {
 		if(localStorage.getItem("playlists"+p.playerUID)){
 			try{
@@ -321,7 +323,7 @@ var jpmplayer = {};
 				let total = (items.length - 1);
 				for(let i = total;0<=i;i--){
 					console.log(items[i]);
-					row += '<div class="yourlists-item"><a href="javascript:popUp(\''+items[i].id+'\')">'+items[i].title+'</a> <span class="removelist" onclick="javascript:jpmplayer.removeList(\''+items[i].id+'\',this)"></span></div>';
+					row += '<div class="yourlists-item"><a href="javascript:jpmplayer.getPlaylist(\''+items[i].id+'\')">'+items[i].title+'</a> <span class="removelist" onclick="javascript:jpmplayer.removeList(\''+items[i].id+'\',this)"></span></div>';
 				}
 				let playlists = document.getElementById("yourlists");
 				if(total < 0){
@@ -358,11 +360,15 @@ var jpmplayer = {};
 		embed = (embed == 'youtu.be') ? 'youtube.com' : embed;
 		let symbol = vid.indexOf('?') > -1 ? '&' : '?';
 		let extend = '';
+		
+		this.domain = embed;
+		this.onPlay();
+		let newurl = this.serverURL;
+	
 		if(autoplay){
 			extend = (embed == 'youtube.com' || embed == 'bitchute.com' || embed == 'dailymotion.com') ? symbol +'autoplay=1' : '';
-		}
-		
-		let newurl = this.serverURL;
+		}	
+	
 		newurl = newurl.replace('{query}',extend);
 		newurl = newurl.replace('{vid}',vid);
 		this.iframeURL = newurl.replace('{domain}',embed);
