@@ -35,35 +35,37 @@
 </section>
 <!-- Start of playlists code -->
 <script>
-	// overlay/popup settings
-	var jpmx2 = new jpmpopup({
-		'container':'popup-container',
-		'onclose' : function () {console.log(this);},
-		'style' :'background-color:rgba(0, 0, 0, 0.8);width:100%;z-index:5'
-	});
-	function popUp(id){
-		// optional iframe allow attr
-		//allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-		// overlay interface
-		jpmx2.item = {
-			'id':'1','type':'','file':'',
-			'html':'<div class="wrap-container"><div class="left-column" id="left-column"><iframe width="760" height="515" src="" style="max-width:100%;max-height:100%;" frameborder="0" id="videoframe" allowfullscreen></iframe></div><div class="right-column" id="right-column"><div id="sidebarlist"><button onclick="jpmplayer.addForm(\'add\')" id="addform">Add Videos</button><div id="addvideoform"><form method="post" action="" onsubmit="return false;"><div><input type="text" placeholder="Video Title" id="videotitle" /></div><div><input type="text" placeholder="Video URL" id="videourl" /></div><button onclick="jpmplayer.addItem(\''+id+'\')">Add Video</button> &nbsp; <button onclick="jpmplayer.addForm(\'done\')">Done</button></form></div><div id="playlist"></div></div></div>'
-		};
-		jpmx2.container = 'player1';
-		jpmx2.style = 'width:100%;z-index:5;background-color:rgba(0, 0, 0, 0.9)';
-		jpmx2.onopen = function(){
-			jpmplayer.getList(id);
-		}
-		jpmx2.fullScreen(jpmx2.item.html);
-	}
-	
-	jpmplayer.ini = function(){
-		// The playlist settings:
-		// the iframe URL template
-		this.serverURL = 'https://www.{domain}/embed/{vid}{query}';
-		// what users input video URL to match for
-		this.regmatch = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i;
-		this.getPlaylists();
+	window.onload = function() {
+		// overlay/popup settings
+		var jpmx2 = new jpmpopup({
+			'container':'player1',
+			'onclose' : function () {console.log(this);},
+			'style' :'width:100%;z-index:5;background-color:rgba(0, 0, 0, 0.9)',
+			'item': {'id':'1','type':'html','file':''}
+		});
+		// exe playlist app
+		jpmplayer.ini({
+			// onclick get playlist
+			'getPlaylist' : function(id){
+				// overlay interface
+				jpmx2.fullScreen('<div class="wrap-container"><div class="left-column" id="left-column"><iframe width="760" height="515" src="" style="max-width:100%;max-height:100%;" frameborder="0" id="videoframe" allowfullscreen></iframe></div><div class="right-column" id="right-column"><div id="sidebarlist"><button onclick="jpmplayer.addForm(\'add\')" id="addform">Add Videos</button><div id="addvideoform"><form method="post" action="" onsubmit="return false;"><div><input type="text" placeholder="Video Title" id="videotitle" /></div><div><input type="text" placeholder="Video URL" id="videourl" /></div><button onclick="jpmplayer.addItem(\''+id+'\')">Add Video</button> &nbsp; <button onclick="jpmplayer.addForm(\'done\')">Done</button></form></div><div id="playlist"></div></div></div>');
+				jpmplayer.getList(id);
+			},
+			// on selection of video to play
+			'onPlay' : function(){
+				// the iframe URL template
+				// use this to set iframes for different video sites
+				// {query} auto adds the key/value autoplay=1
+				if(this.domain == 'youtube.com'){
+					this.serverURL = 'https://www.{domain}/embed/{vid}{query}';
+				}else {
+					this.serverURL = 'https://www.{domain}/embed/{vid}{query}';
+				}
+			},
+			// what users input video URL to match for
+			// this is the default... also has a backup
+			'regmatch' : /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i
+		});
 	}
 </script>
 <!-- End of playlists code -->
