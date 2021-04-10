@@ -9,14 +9,11 @@
  // No outside plugins required
  // Feel free to share with others
  // for support, see my blog: https://jimswebtech.blogspot.com/
-
 Supported URLs:
-
 (domain)/watch?v=(video_id)
 (domain)/embed/(video_id)
 (domain)/(video_id)
 (domain)/video/(video_id)
-
 To-do Notes:
 in the future all alerts will be replaced with a custom alert box
 data input checks will be improved for import option
@@ -30,20 +27,20 @@ var jpmplayer = {};
 	const debug = false;
 	p.ini = function(set){
 		p.regmatch = (set.regmatch !== undefined) ? set.regmatch :/(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i;
-	p.regmatch2 = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(.+)/i;
+		p.regmatch2 = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(.+)/i;
 		p.getPlaylist = (set.getPlaylist !== undefined) ? set.getPlaylist : function(id){alert('No popup interface defined for '+id+'.')};
 		p.onPlay = (set.onPlay !== undefined) ? set.onPlay : function(id){};
-		p.serverURL = (set.serverURL !== undefined) ? set.serverURL : 'https://www.{domain}/embed/{vid}{query}';	
+		p.serverURL = (set.serverURL !== undefined) ? set.serverURL : 'https://www.{domain}/embed/{vid}{query}';
 		p.docHeight = window.document.body.clientHeight;
 		p.docWidth = window.document.body.clientWidth;
-		p.getPlaylists();		
+		p.getPlaylists();
 	}
 	p.playerUID = 'X2';
 	p.iframeReplace = 'https://www.{domain}/embed/{vid}{query}';
 	p.iframeURL = '';
 	p.domain = '';
 	p.playlist = {};
-	p.reg = /[^A-Za-z0-9,‘’”“'"*$#^+!()=?&:/_.-\s]/g;
+	p.reg = /[^A-Za-z0-9,‘’”“'"*$#^+!()=?&:;/_.-\s]/g;
 	p.urlreg = /[^A-Za-z0-9'"*$#^+!()=?&:/_.-]/g;
 	p.importAll = function(pitems) {
 		if(localStorage.getItem("playlists"+p.playerUID)){
@@ -86,7 +83,7 @@ var jpmplayer = {};
 		}
 	}
 	p.outputHTML = function(control) {
-		
+
 		if(control == 'main'){
 			var boxname = 'exported2';
 			var buttonname = 'importbutton2';
@@ -121,8 +118,8 @@ var jpmplayer = {};
 			}
 			button.innerHTML = 'Import';
 			document.getElementById(local).appendChild(button);
-		}		
-		
+		}
+
 		if(control != 'sidebar'){
 			let importbutton = document.getElementById(buttonname);
 			let importbox = document.getElementById(local);
@@ -282,7 +279,7 @@ var jpmplayer = {};
 	p.createPlaylist = function() {
 		let list = [];
 		if(typeof(Storage) !== 'undefined') {
-		
+
 		document.getElementById('importbutton2').innerHTML = 'Import';
 		let title = prompt("Enter a title for this playlist:");
 		if(title != null){
@@ -329,7 +326,7 @@ var jpmplayer = {};
 				if(total < 0){
 					playlists.style.display = "none";
 				}else {
-					
+
 					// this line is optional for version 2, the other credit line cannot be removed
 					// credit back welcomed here
 					row += '<div class="yourlists-item"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:11px;color:#ccc">Powered by JPM Playlist</a></div>';
@@ -344,7 +341,7 @@ var jpmplayer = {};
 		}
 	}
 	p.playVideo = function (vid,domain,tld,clicked,autoplay) {
-		
+
 		this.docHeight = window.document.body.clientHeight;
 		this.docWidth = window.document.body.clientWidth;
 		// auto play is set for YT... may not work if YT blocks
@@ -360,21 +357,21 @@ var jpmplayer = {};
 		embed = (embed == 'youtu.be') ? 'youtube.com' : embed;
 		let symbol = vid.indexOf('?') > -1 ? '&' : '?';
 		let extend = '';
-		
+
 		this.domain = embed;
 		this.onPlay();
 		let newurl = this.serverURL;
-	
+
 		if(autoplay){
 			extend = (embed == 'youtube.com' || embed == 'bitchute.com' || embed == 'dailymotion.com') ? symbol +'autoplay=1' : '';
-		}	
-	
+		}
+
 		newurl = newurl.replace('{query}',extend);
 		newurl = newurl.replace('{vid}',vid);
 		this.iframeURL = newurl.replace('{domain}',embed);
-		
+
 		//this.iframeURL = "https://www."+embed+"/embed/"+vid+extend;
-		
+
 		if(!debug){
 			video.src = this.iframeURL;
 		}
@@ -403,7 +400,11 @@ var jpmplayer = {};
 			var loading = document.getElementById('loadingdiv');
 		}
 		if(this.docWidth < 480){
-			document.body.scrollTop = document.documentElement.scrollTop = 0;
+			let totop = document.querySelector('.overlay');
+			window.document.body.scrollTop = window.document.documentElement.scrollTop = 0;
+			totop.scrollTop = 0;
+			//totop.scrollTo(0, 0);
+			totop.pageYOffset = 0;
 		}
 		if(!debug){
 			loading.style.display = 'block';
