@@ -4,7 +4,7 @@
  // http://www.jpmalloy.com
  // james (@) jpmalloy.com
  // Credit must stay intact for legal use
- // Version 2 (build "1.2")
+ // Version 2 (build "1.3")
  // *** 100% free, do with what you like with credit back ***
  // No outside plugins required
  // Feel free to share with others
@@ -30,6 +30,7 @@ var jpmplayer = {};
 		p.regmatch2 = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(.+)/i;
 		p.getPlaylist = (set.getPlaylist !== undefined) ? set.getPlaylist : function(id){alert('No popup interface defined for '+id+'.')};
 		p.onPlay = (set.onPlay !== undefined) ? set.onPlay : function(id){};
+		p.covers = (set.covers !== undefined) ? set.covers : true;
 		p.serverURL = (set.serverURL !== undefined) ? set.serverURL : 'https://www.{domain}/embed/{vid}{query}';
 		p.docHeight = window.document.body.clientHeight;
 		p.docWidth = window.document.body.clientWidth;
@@ -110,7 +111,7 @@ var jpmplayer = {};
 			}else{
 				button.setAttribute('onclick','javascript:jpmplayer.import(\'main\')');
 			}
-			button.setAttribute('id',buttonname);
+			button.setAttribute('id','closeimport');
 			if(control == 'sidebar'){
 				button.setAttribute('style','margin-top:20px;width:auto');
 			}else {
@@ -279,9 +280,10 @@ var jpmplayer = {};
 	p.createPlaylist = function() {
 		let list = [];
 		if(typeof(Storage) !== 'undefined') {
-
 		document.getElementById('importbutton2').innerHTML = 'Import';
-		let title = prompt("Enter a title for this playlist:");
+		//let title = prompt("Enter a title for this playlist:");
+		let titleinput = document.getElementById("playlisttitle");
+		let title = titleinput.value;
 		if(title != null){
 			title = (title == '') ? 'Untitled playlist' : title;
 			title = title.replace(this.reg, '');
@@ -294,6 +296,7 @@ var jpmplayer = {};
 				list.push({"id":d,"title":title,"data":[]});
 				try {
 					localStorage.setItem("playlists"+p.playerUID, JSON.stringify(list));
+					titleinput.value = '';
 				} catch (e) {
 					if (e == QUOTA_EXCEEDED_ERR || e.code === "22" || e.code === "1024") {
 						alert('Local storage is full. Please remove old playlist videos to add new ones.');
@@ -329,7 +332,7 @@ var jpmplayer = {};
 
 					// this line is optional for version 2, the other credit line cannot be removed
 					// credit back welcomed here
-					row += '<div class="yourlists-item"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:11px;color:#ccc">Powered by JPM Playlist</a></div>';
+					// row += '<div class="yourlists-item"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:11px;color:#ccc">Powered by JPM Playlist</a></div>';
 					playlists.style.display = "block";
 				}
 				playlists.innerHTML = row;
@@ -422,6 +425,28 @@ var jpmplayer = {};
 			}
 		}
 	}
+	p.showImg = function (id,type,elem) {
+		if(this.covers){
+			if(document.querySelector('#videoimg-'+id)){
+				let img = document.querySelector('#videoimg-'+id);
+				if(img.style.display == 'block'){
+					img.style.display = 'none';
+				}else {
+					img.style.display = 'block';
+				}
+			}else {
+					// you can add support for other video covers here
+					if(type == 'youtube'){
+						var imgnode = document.createElement('img');
+						imgnode.setAttribute('src','https://i.ytimg.com/vi/'+id+'/default.jpg');
+						imgnode.setAttribute('class','videoimg');
+						imgnode.setAttribute('style','display:block');
+						imgnode.setAttribute('id','videoimg-'+id);
+						elem.appendChild(imgnode);
+					}
+			}
+		}
+	}
 	p.getList = function(listid,sort) {
 		if(typeof(Storage) !== 'undefined') {
 			let list = localStorage.getItem("playlists"+p.playerUID);
@@ -486,11 +511,7 @@ var jpmplayer = {};
 					if(items[i].list == listid){
 						has_videos = true;
 						let img = '';
-						if(items[i].type == 'youtube'){
-							//img = '<img src="https://i.ytimg.com/vi/'+items[i].id+'/hqdefault.jpg" alt="" style="width:100px;height:auto" />'
-							//<div class="videoimg">'+img+'</div>
-						}
-						 row += '<div class="playlist-item"><a href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',\''+listid+'\',this)"></span></div>';
+						row += '<div class="playlist-item" onmouseenter="jpmplayer.showImg(\''+items[i].id+'\',\''+items[i].type+'\',this)" onmouseleave="jpmplayer.showImg(\''+items[i].id+'\',\''+items[i].type+'\',this)"><a href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',\''+listid+'\',this)"></span></div>';
 						 if(count == 0){
 							lasti = i;
 						 }
@@ -500,7 +521,10 @@ var jpmplayer = {};
 				count--;
 
 				row += '<div class="playlist-item"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:12px;color:#ccc">Powered by JPM Playlist</a></div>';
-				document.getElementById("playlist").innerHTML = '<div style="margin-bottom:20px"><a href="javascript:jpmplayer.sortList(\''+listid+'\',\'a-z\')">A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'z-a\')">Z-A</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'\')">Newest</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'old\')">Oldest</a></div><div id="jpmplayer">' + row + '</div><div style="margin-top:20px"><a href="javascript:jpmplayer.export(\''+listid+'\')">Export</a> &nbsp; <a href="javascript:jpmplayer.outputHTML(\'sidebar\')">Import</a></div>';
+
+				let pl = document.getElementById("playlist");
+				pl.style.display = (total == -1) ? 'none' : 'block';
+				pl.innerHTML = '<div style="margin-bottom:20px"><a href="javascript:jpmplayer.sortList(\''+listid+'\',\'a-z\')">A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'z-a\')">Z-A</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'\')">Newest</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'old\')">Oldest</a></div><div id="jpmplayer">' + row + '</div><div style="margin-top:20px"><a href="javascript:jpmplayer.export(\''+listid+'\')">Export</a> &nbsp; <a href="javascript:jpmplayer.outputHTML(\'sidebar\')">Import</a></div>';
 
 				if(has_videos){
 					this.playVideo(''+items[lasti].id+'',''+items[lasti].type+'',''+items[lasti].tld+'','video-'+lasti,false);

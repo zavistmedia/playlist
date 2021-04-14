@@ -73,11 +73,16 @@ button {
 	color: #fff;
 	padding: 10px 16px;
 	cursor: pointer;
-
+	border-radius: 18px;
 }
-div.videoimg {
-	width: 100px;
-	position: relative;
+img.videoimg {
+	position: absolute;
+	top: 0px;
+	right: 36px;
+	width: 48px;
+	height: 48px;
+	z-index: 100;
+	/*box-shadow: 0px 0px 20px #000;*/
 }
 div#jpmplayer {
 	border-top: 1px solid #000;
@@ -200,7 +205,7 @@ div.right-column input[type='submit']{
 	color: #FFFFFF;
 	font-size: 14px;
 }
-div.right-column input[type='text'], textarea#exported, textarea#exported2 {
+div.right-column input[type='text'], textarea#exported, textarea#exported2, #createplaylist input[type='text']{
 	width: 100%;
 	border: 1px solid yellowgreen;
 	padding: 10px;
@@ -377,6 +382,7 @@ div.playlist-item {
     flex-wrap: nowrap;
     height: auto;
 	border-bottom: 1px solid #000;
+	position: relative;
 }
 div.playlist-item a {
     padding: 15px 40px 15px 15px;
