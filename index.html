@@ -18,17 +18,20 @@
 	<h1>JPM Playlist</h1>
 </header>
 <section>
-	<h2>News</h2><p>Version 2 is here.</p>
 	<h2>Example</h2>
-	
 	<!-- Start of playlists code -->
-	<div id="buttonlist">
-		<button onclick="jpmplayer.createPlaylist()">Create Playlist</button> <button onclick="jpmplayer.outputHTML('main')" id="importbutton2">Import</button> <button onclick="jpmplayer.exportAll()">Export All</button>
+	<div id="createplaylist">
+		<form method="post" action="" onsubmit="return false;">
+			<div class="createform"><input type="text" placeholder="Playlist Title" id="playlisttitle" style="max-width:220px;display:inline-block;margin-right:10px" /> <button onclick="jpmplayer.createPlaylist()" style="display:inline-block">Create</button></div>
+		</form>
 	</div>
-	<div id="mainimport"></div>
+	<div style="margin-top:20px"><a href="javascript:jpmplayer.sortPlaylists('a-z')">A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortPlaylists('z-a')">Z-A</a></div>
 	<div id="yourlists"></div>
+	<div id="mainimport"></div>
+	<div id="buttonlist" style="margin-top:20px">
+		<button onclick="jpmplayer.outputHTML('main')" id="importbutton2">Import</button> <button onclick="jpmplayer.exportAll()">Export All</button>
+	</div>
 	<!-- End of playlists code -->
-	
 	<h2>Download</h2>
 	<p><a href="jpmplaylist2.zip" download="jpmplaylist2.zip">Version 2</a></p>
 	<p style="text-align:center;">Copyright &copy; 2020 - 2021 James P. Malloy All Rights Reserved.</p>
@@ -38,9 +41,9 @@
 	window.onload = function() {
 		// overlay/popup settings
 		var jpmx2 = new jpmpopup({
-			'container':'player1',
-			'onclose' : function () {console.log(this);},
-			'style' :'width:100%;z-index:5;background-color:rgba(0, 0, 0, 0.9)',
+			'container' : 'player1',
+			'onclose': function () {console.log(this);},
+			'style' : 'width:100%;z-index:5;background-color:rgba(0, 0, 0, 0.9)',
 			'item': {'id':'1','type':'html','file':''}
 		});
 		// exe playlist app
