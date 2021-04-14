@@ -14,6 +14,15 @@
  // for support, see my blog: https://jimswebtech.blogspot.com/
 
  */
+div.createform {
+	margin-bottom:20px;
+	max-width: 100%;
+	padding: 0;
+	display: flex;
+	flex-wrap: nowrap;
+	height: auto;
+	max-width: 300px;
+}
 div.itemstats {
 	display: block;
 	z-index: 2000;
@@ -233,6 +242,7 @@ section#comments {
 }
 a {
 	color: yellowgreen;
+	text-decoration: none;
 }
 p {
 	margin-bottom: 0;

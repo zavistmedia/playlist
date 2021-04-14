@@ -4,7 +4,7 @@
  // http://www.jpmalloy.com
  // james (@) jpmalloy.com
  // Credit must stay intact for legal use
- // Version 2 (build "1.3")
+ // Version 2 (build "1.4")
  // *** 100% free, do with what you like with credit back ***
  // No outside plugins required
  // Feel free to share with others
@@ -311,15 +311,44 @@ var jpmplayer = {};
 			alert("Sorry, your browser does not support Local Storage. Please update your browser or allow local storage.");
 		}
 	}
-	p.sortList = function(listid,sort) {
-		p.getList(listid,sort);
+	p.sortPlaylists = function(sort) {
+		this.getPlaylists(sort);
 	}
-	p.getPlaylists  = function() {
+	p.sortList = function(listid,sort) {
+		this.getList(listid,sort);
+	}
+	p.getPlaylists  = function(sort) {
 		if(typeof(Storage) !== 'undefined') {
 			let list = localStorage.getItem("playlists"+p.playerUID);
 			if(list !== null && list !== undefined){
 				let row = '';
 				let items = JSON.parse(list);
+				if(typeof(sort) !== 'undefined') {
+					if(sort == 'a-z'){
+						items.sort(function(a, b){
+							var titleA = a.title.toLowerCase(), titleB = b.title.toLowerCase();
+							if(titleA > titleB){
+								return -1
+							}
+							if(titleA < titleB){
+								return 1
+							}
+							return 0
+						})
+					}else if(sort == 'z-a'){
+						items.sort(function(a, b){
+							var titleA = a.title.toLowerCase(), titleB = b.title.toLowerCase();
+							if(titleA < titleB){
+								return -1
+							}
+							if(titleA > titleB){
+								return 1
+							}
+							return 0
+						})
+					}else if(sort == ''){}
+				}				
+				
 				let total = (items.length - 1);
 				for(let i = total;0<=i;i--){
 					console.log(items[i]);
@@ -520,7 +549,7 @@ var jpmplayer = {};
 				}
 				count--;
 
-				row += '<div class="playlist-item"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:12px;color:#ccc">Powered by JPM Playlist</a></div>';
+				row += '<div class="playlist-item"><a href="http://www.jpmalloy.com" target="_blank" style="font-size:12px;">Powered by JPM Playlist</a></div>';
 
 				let pl = document.getElementById("playlist");
 				pl.style.display = (total == -1) ? 'none' : 'block';
