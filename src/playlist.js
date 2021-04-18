@@ -52,9 +52,10 @@ var jpmplayer = {};
 				for(let i = 0;pitems.playlists.length>i;i++){
 					var id = pitems.playlists[i].id;
 					var title = pitems.playlists[i].title;
+					var sort = pitems.playlists[i].sort !== undefined ? pitems.playlists[i].sort : '';
 					if(!p.in_array2(id,list)){
 						// playlist not in existing array, add it
-						list.push({"id":id,"title":title,"data":pitems.playlists[i].data});
+						list.push({"id":id,"title":title,"sort":sort,"data":pitems.playlists[i].data});
 						if(document.getElementById("exported2")){
 							let exported2 = document.getElementById("exported2");
 							exported2.value = '';
@@ -158,8 +159,9 @@ var jpmplayer = {};
 				let list = JSON.parse(localStorage.getItem("playlists"+p.playerUID));
 				list = (list === null || list === undefined) ? [] : list;
 				let id = pitems.playlist.id;
+				let sort = pitems.playlist.sort !== undefined ? pitems.playlist.sort : '';
 				if(!p.in_array2(id,list)){
-					list.push({"id":id,"title":title,"data":pitems.playlist.data});
+					list.push({"id":id,"title":title,"sort":sort,"data":pitems.playlist.data});
 					try{
 						var videos = JSON.stringify(list);
 						localStorage.setItem("playlists"+p.playerUID, videos);
@@ -215,6 +217,7 @@ var jpmplayer = {};
 						plist[count] = {
 							"id":pitems[i].id,
 							"title":pitems[i].title,
+							"sort":pitems[i].sort,
 							"data":pitems[i].data
 						}
 						count++;
@@ -223,6 +226,7 @@ var jpmplayer = {};
 							plist = {
 								"id":pitems[i].id,
 								"title":pitems[i].title,
+								"sort":pitems[i].sort,
 								"data":pitems[i].data
 							}
 							break;
@@ -293,7 +297,7 @@ var jpmplayer = {};
 			//let d = (new Date()).getTime();
 			let d = (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
 			if(!p.in_array2(d,list)){
-				list.push({"id":d,"title":title,"data":[]});
+				list.push({"id":d,"title":title,"sort":"","data":[]});
 				try {
 					localStorage.setItem("playlists"+p.playerUID, JSON.stringify(list));
 					titleinput.value = '';
@@ -445,14 +449,22 @@ var jpmplayer = {};
 			}
 		}
 	}
-	p.getListById = function(list,listid) {
+	p.getListById = function(list,listid,sort) {
 		// list is all playlist data object, listid is the list you want to get
 		for(let i=0, len=list.length;i<len;i++) {
 			if (list[i].id == listid){
+				if(typeof(sort) !== 'undefined') {
+					list[i].sort = sort;
+				}
 				p.playlist = list[i];
-				return p.playlist;
+				break;
 			}
 		}
+		
+		if(typeof(sort) !== 'undefined') {
+			localStorage.setItem("playlists"+p.playerUID, JSON.stringify(list));
+		}
+		return p.playlist;
 	}
 	p.showImg = function (id,type,elem) {
 		if(this.covers){
@@ -482,7 +494,14 @@ var jpmplayer = {};
 			if(list !== null && list !== undefined){
 				let row = '';
 				list = JSON.parse(list);
-				let items = this.getListById(list,listid).data;
+				let playing = this.getListById(list,listid,sort);
+				let items = playing.data;
+				
+				if(typeof(sort) === 'undefined') {
+					if(playing.sort !== undefined){
+						sort = playing.sort;
+					}
+				}
 
 				if(typeof(sort) !== 'undefined') {
 					if(sort == 'a-z'){
@@ -531,6 +550,7 @@ var jpmplayer = {};
 						})
 					}
 				}
+				
 				console.log(items);
 				let total = (items.length - 1);
 				let count = 0;
