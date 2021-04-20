@@ -32,9 +32,8 @@
 	<div id="buttonlist" style="margin-top:20px">
 		<button onclick="jpmplayer.outputHTML('main')" id="importbutton2">Import</button> <button onclick="jpmplayer.exportAll()">Export All</button>
 	</div>
-	<p style="margin-bottom:20px">Playlist Configuration (Optional)</p>
-	<textarea id="playlistconfig">{"config":{"allow":[{"iframe":"https://www.(domain)/(vid)","domain":"somesite.com"},{"iframe":"https://www.(domain)/embed/(vid)(query)","domain":"youtube.com"}]}}
-</textarea>
+	<p style="margin-bottom:20px">Playlist Configuration (Optional). Note: some sites will block access to embeded videos using the playlist script.</p>
+	<textarea id="playlistconfig">{"config":{"regex":"/(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i","allow":[{"iframe":"https://www.(domain)/embed/video/(vid)(query)","domain":"somevideosite.com"},{"iframe":"https://www.(domain)/embed/(vid)(query)","domain":"youtube.com"}]}}</textarea>
 	<button onclick="jpmplayer.setConfig()">Save</button>
 	<!-- End of playlists code -->
 	<h2>Download</h2>
@@ -72,7 +71,7 @@
 			},
 			// what users input video URL to match for
 			// this is the default... also has a backup
-			'regmatch' : /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i
+			'regmatch' : /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/|embed\/video\/)(.+)/i
 		});
 	}
 </script>
