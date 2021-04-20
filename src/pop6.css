@@ -14,6 +14,13 @@
  // for support, see my blog: https://jimswebtech.blogspot.com/
 
  */
+textarea#playlistconfig {
+	margin-bottom: 20px;
+	width: 100%;
+	max-width: 600px;
+	height: 100px;
+	display: block !important;
+}
 div.createform {
 	margin-bottom:20px;
 	max-width: 100%;
@@ -60,11 +67,11 @@ div#addvideoform > form > div {
 
 	margin-bottom: 10px;
 }
-a.clickeditem {
+div.playlist-item a.clickeditem {
 	background-color: #111 !important;
 	color: #fff !important;
 }
-a.visiteditem {}
+div.playlist-item a.visiteditem {}
 div.videotitle a {
 	padding: 15px 40px 15px 15px;
 	text-decoration: none;
@@ -84,7 +91,26 @@ button {
 	cursor: pointer;
 	border-radius: 18px;
 }
-img.videoimg {
+/* for inplace cover images */
+div.playlist-item div.imghold {
+	max-width: 100%;
+	padding: 0;
+	display: flex;
+	flex-wrap: nowrap;
+	height: auto;
+	position: relative;
+	align-items: center;
+	background-color: #000;
+	justify-content: center;
+}
+div.playlist-item img.coverimg {
+	position: relative;
+	width: 48px;
+	height: 48px;
+	cursor: pointer;
+}
+/* for onhover cover images */
+div.playlist-item img.videoimg {
 	position: absolute;
 	top: 0px;
 	right: 36px;
@@ -94,9 +120,7 @@ img.videoimg {
 	/*box-shadow: 0px 0px 20px #000;*/
 }
 div#jpmplayer {
-	border-top: 1px solid #000;
-	border-left: 1px solid #000;
-	border-right: 1px solid #000;
+	border: none;
 }
 div#yourlists{
 	margin: 20px 0px;
@@ -214,7 +238,7 @@ div.right-column input[type='submit']{
 	color: #FFFFFF;
 	font-size: 14px;
 }
-div.right-column input[type='text'], textarea#exported, textarea#exported2, #createplaylist input[type='text']{
+div.right-column input[type='text'], textarea#exported, textarea#playlistconfig, textarea#exported2, #createplaylist input[type='text']{
 	width: 100%;
 	border: 1px solid yellowgreen;
 	padding: 10px;
@@ -391,18 +415,19 @@ div.playlist-item {
     display: flex;
     flex-wrap: nowrap;
     height: auto;
-	border-bottom: 1px solid #000;
+	border-bottom: 5px solid #222;
 	position: relative;
+	background-color: transparent;
 }
 div.playlist-item a {
     padding: 15px 40px 15px 15px;
     text-decoration: none;
-    background-color: #333;
+    background-color: transparent;
     outline: none;
     width: 90%;
     flex: 1;
 }
-span.removeitem {
+div.playlist-item span.removeitem {
     font-size: 22px;
     cursor: pointer;
     background-color: yellowgreen;

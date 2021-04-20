@@ -4,7 +4,7 @@
  // http://www.jpmalloy.com
  // james (@) jpmalloy.com
  // Credit must stay intact for legal use
- // Version 2 (build "1.4")
+ // Version 2 (build "1.5")
  // *** 100% free, do with what you like with credit back ***
  // No outside plugins required
  // Feel free to share with others
@@ -31,6 +31,7 @@ var jpmplayer = {};
 		p.getPlaylist = (set.getPlaylist !== undefined) ? set.getPlaylist : function(id){alert('No popup interface defined for '+id+'.')};
 		p.onPlay = (set.onPlay !== undefined) ? set.onPlay : function(id){};
 		p.covers = (set.covers !== undefined) ? set.covers : true;
+		p.onhover = (set.onhover !== undefined) ? set.onhover : false;
 		p.serverURL = (set.serverURL !== undefined) ? set.serverURL : 'https://www.{domain}/embed/{vid}{query}';
 		p.docHeight = window.document.body.clientHeight;
 		p.docWidth = window.document.body.clientWidth;
@@ -396,6 +397,25 @@ var jpmplayer = {};
 
 		this.domain = embed;
 		this.onPlay();
+		if(localStorage.getItem("config"+p.playerUID)){
+			try{
+				let list = JSON.parse(localStorage.getItem("config"+p.playerUID));
+				list = (list === null || list === undefined) ? {} : list;
+				if(list.config.allow !== undefined){
+					for(let i = 0;list.config.allow.length>i;i++){
+						var iframe = list.config.allow[i].iframe;
+						var domain = list.config.allow[i].domain;
+						if(this.domain == domain){
+							iframe = iframe.replaceAll("(","{");
+							iframe = iframe.replaceAll(")","}");
+							this.serverURL = iframe;
+						}
+					}
+				}
+				//console.log(this.serverURL,'in playvideo');
+			}catch(e){}
+		}			
+		
 		let newurl = this.serverURL;
 
 		if(autoplay){
@@ -560,7 +580,22 @@ var jpmplayer = {};
 					if(items[i].list == listid){
 						has_videos = true;
 						let img = '';
+						
+						if(this.onhover){
+							
 						row += '<div class="playlist-item" onmouseenter="jpmplayer.showImg(\''+items[i].id+'\',\''+items[i].type+'\',this)" onmouseleave="jpmplayer.showImg(\''+items[i].id+'\',\''+items[i].type+'\',this)"><a href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',\''+listid+'\',this)"></span></div>';
+						
+						}else {
+							
+							/* Note: in the future I will replace these with a onclick event handler callback */
+							if(items[i].type == 'youtube'){
+								img = '<div class="imghold"><img src="https://i.ytimg.com/vi/'+items[i].id+'/default.jpg" class="coverimg" onclick="jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" /></div>';
+							}
+							
+							row += '<div class="playlist-item">'+img+'<a href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',\''+listid+'\',this)"></span></div>';
+							
+						}
+						
 						 if(count == 0){
 							lasti = i;
 						 }
@@ -649,6 +684,9 @@ var jpmplayer = {};
 			}
 		}
 	}
+	p.setConfig = function(){
+		configureApp();
+	}
 	p.addForm = function(mode){
 		if(mode == 'add'){
 			document.getElementById("addform").style.display = 'none';
@@ -656,6 +694,36 @@ var jpmplayer = {};
 		}else {
 			document.getElementById("addvideoform").style.display = 'none';
 			document.getElementById("addform").style.display = 'block';
+		}
+	}
+	const configureApp = function() {
+		let input = document.getElementById("playlistconfig");
+		let liststring = input.value;
+		if(liststring != ''){
+			try{
+				let pitems = JSON.parse(liststring);
+				if(pitems.config.allow !== undefined){
+					console.log(pitems.config.allow);
+					let settings = [];
+					for(let i = 0;pitems.config.allow.length>i;i++){
+						var iframe = pitems.config.allow[i].iframe;
+						var domain = pitems.config.allow[i].domain;
+						settings.push({"iframe":iframe,"domain":domain});
+					}
+					try {
+						let list = {"config":{"allow":settings}};
+						console.log(list);
+						localStorage.setItem("config"+p.playerUID, JSON.stringify(list));
+						alert("Configuration saved.");
+					} catch (e) {
+						if (e == QUOTA_EXCEEDED_ERR || e.code === "22" || e.code === "1024") {
+							alert('Local storage is full. Please remove old playlist videos to add new ones.');
+						}
+					}
+				}
+			}catch (e) {
+				alert('Sorry, import configuration data is bad. Default settings will be used instead.');
+			}
 		}
 	}
 	// added v2
