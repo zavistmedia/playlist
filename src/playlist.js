@@ -425,7 +425,9 @@ var jpmplayer = {};
 		newurl = newurl.replace('{query}',extend);
 		newurl = newurl.replace('{vid}',vid);
 		this.iframeURL = newurl.replace('{domain}',embed);
-
+		
+		//console.log(this.iframeURL);
+		//return;
 		//this.iframeURL = "https://www."+embed+"/embed/"+vid+extend;
 
 		if(!debug){
@@ -698,7 +700,7 @@ var jpmplayer = {};
 	}
 	const configureApp = function() {
 		let input = document.getElementById("playlistconfig");
-		let liststring = input.value;
+		let liststring = input.value.replaceAll('\\','~');
 		if(liststring != ''){
 			try{
 				let pitems = JSON.parse(liststring);
@@ -711,7 +713,7 @@ var jpmplayer = {};
 						settings.push({"iframe":iframe,"domain":domain});
 					}
 					try {
-						let list = {"config":{"allow":settings}};
+						let list = {"config":{"regex":pitems.config.regex,"allow":settings}};
 						console.log(list);
 						localStorage.setItem("config"+p.playerUID, JSON.stringify(list));
 						alert("Configuration saved.");
@@ -767,7 +769,28 @@ var jpmplayer = {};
 				}else {
 					title = title.replace(this.reg, '');
 				}
-				let matches = url.match(this.regmatch);
+				
+				let setregex = '';
+				if(localStorage.getItem("config"+p.playerUID)){
+					try{
+						let config = JSON.parse(localStorage.getItem("config"+p.playerUID));
+						config = (config === null || config === undefined) ? {} : config;
+						if(config.config.regex !== undefined){
+							let regexstring = config.config.regex;
+							// it works ;)
+							regexstring = regexstring.replaceAll('~','\\');
+							console.log(regexstring);
+							setregex = eval(regexstring);
+						}else {
+							setregex = this.regmatch;
+						}
+					}catch(e){
+						setregex = this.regmatch;
+					}
+				}else {
+					setregex = this.regmatch;
+				}
+				let matches = url.match(setregex);
 
 				if(localStorage.getItem("playlists"+p.playerUID)){
 					list = JSON.parse(localStorage.getItem("playlists"+p.playerUID));
