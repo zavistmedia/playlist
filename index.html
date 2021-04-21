@@ -19,7 +19,7 @@
 </header>
 <section>
 	<h2>Example</h2>
-	<p style="margin-bottom:20px">A live site using it: <a href="https://www.playlistjungle.com" target="_blank">https://www.playlistjungle.com</a></p>
+	<p style="margin-bottom:20px">A live site using it: <a href="https://www.playlistjungle.com" target="_blank">https://www.playlistjungle.com</a> This script uses Local Storage.</p>
 	<!-- Start of playlists code -->
 	<div id="createplaylist">
 		<form method="post" action="" onsubmit="return false;">
@@ -32,7 +32,7 @@
 	<div id="buttonlist" style="margin-top:20px">
 		<button onclick="jpmplayer.outputHTML('main')" id="importbutton2">Import</button> <button onclick="jpmplayer.exportAll()">Export All</button>
 	</div>
-	<p style="margin-bottom:20px">Playlist Configuration (Optional). Note: some sites will block access to embeded videos using the playlist script.</p>
+	<p style="margin-bottom:20px">Playlist Configuration (Optional). Note: The regex in the JSON string below will only validate with this system, because the script replaces the conflicting characters. I may change this in the future. You can always just use the onPlay callback function. This is mainly for demo purposes.</p>
 	<textarea id="playlistconfig">{"config":{"regex":"/(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i","allow":[{"iframe":"https://www.(domain)/embed/video/(vid)(query)","domain":"somevideosite.com"},{"iframe":"https://www.(domain)/embed/(vid)(query)","domain":"youtube.com"}]}}</textarea>
 	<button onclick="jpmplayer.setConfig()">Save</button>
 	<!-- End of playlists code -->
