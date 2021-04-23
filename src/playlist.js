@@ -4,7 +4,7 @@
  // http://www.jpmalloy.com
  // james (@) jpmalloy.com
  // Credit must stay intact for legal use
- // Version 2 (build "1.6")
+ // Version 2 (build "1.7")
  // *** 100% free, do with what you like with credit back ***
  // No outside plugins required
  // Feel free to share with others
@@ -31,11 +31,37 @@ var jpmplayer = {};
 		p.regmatch2 = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(.+)/i;
 		p.getPlaylist = (set.getPlaylist !== undefined) ? set.getPlaylist : function(id){alert('No popup interface defined for '+id+'.')};
 		p.onPlay = (set.onPlay !== undefined) ? set.onPlay : function(id){};
+		p.onLoad = (set.onLoad !== undefined) ? set.onLoad : function(id){};
 		p.covers = (set.covers !== undefined) ? set.covers : true;
 		p.onhover = (set.onhover !== undefined) ? set.onhover : false;
+		p.videoheight = '';
+		p.videowidth = '';
 		p.serverURL = (set.serverURL !== undefined) ? set.serverURL : 'https://www.{domain}/embed/{vid}{query}';
 		p.docHeight = window.document.body.clientHeight;
 		p.docWidth = window.document.body.clientWidth;
+		this.onLoad();
+		if(localStorage.getItem("config"+p.playerUID)){
+
+				this.loadConfig();
+				//setTimeout(function(){},500)
+				try{
+					let config = JSON.parse(localStorage.getItem("config"+p.playerUID));
+					this.videoheight = config.config.height;
+					this.videowidth = config.config.width;
+					if(document.getElementsByTagName("link") && config.config.css != ''){
+						document.getElementsByTagName("link")[0].href = config.config.css;
+					}
+					if(document.getElementById("logo") && config.config.logo != ''){
+						let logo = document.getElementById("logo");
+						logo.src = config.config.logo;
+						logo.onload = function(){
+							document.getElementById("loadingdiv2").style.display = 'none';
+						}
+					}else {
+						document.getElementById("loadingdiv2").style.display = 'none';
+					}
+				}catch(e){}
+		}			
 		p.getPlaylists();
 	}
 	p.playerUID = 'X2';
@@ -94,11 +120,6 @@ var jpmplayer = {};
 		}
 		if(!document.getElementById(boxname)){
 			var input = document.createElement('textarea');
-			if(control == 'sidebar'){
-				//input.setAttribute('style','display:block;width:auto;height:160px;margin:20px;box-sizing:border-box');
-			}else {
-				input.setAttribute('style','display:block;width:100%;height:160px;margin-top:20px;box-sizing:border-box');
-			}
 			input.setAttribute('id',boxname);
 			input.setAttribute('placeholder',"Paste list data here to import.");
 			document.getElementById(local).appendChild(input);
@@ -191,7 +212,7 @@ var jpmplayer = {};
 			}
 		}
 		catch(err){
-			alert('Sorry, could not import playlist. The data is corrupted. ' + err + ' line 164');
+			alert('Sorry, could not import playlist. The data is corrupted. ' + err + '');
 		}
 	}
 	p.export = function(listid) {
@@ -237,7 +258,7 @@ var jpmplayer = {};
 				}
 			}
 			catch(err) {
-				alert('Sorry, could not export playlist. The data is corrupted. ' + err +' line 208');
+				alert('Sorry, could not export playlist. The data is corrupted. ' + err +'');
 			}
 		}
 
@@ -379,6 +400,10 @@ var jpmplayer = {};
 		}
 		document.getElementById(clicked).setAttribute('class','clickeditem');
 		let video = document.getElementById('videoframe');
+		if(this.videowidth != ''){
+			video.style.width = this.videowidth+'px';
+			video.style.height = this.videoheight+'px';
+		}
 		let leftface = document.getElementById('left-column');
 		let embed = domain+tld;
 		embed = (embed == 'youtu.be') ? 'youtube.com' : embed;
@@ -459,6 +484,22 @@ var jpmplayer = {};
 			video.onload = function () {
 				loading.style.display = 'none';
 			}
+		}
+	}
+	p.loadConfig = function() {
+
+		if(!document.getElementById('loadingdiv2')){
+			let loading = document.createElement('div');
+			loading.setAttribute('class','loading');
+			loading.setAttribute('id','loadingdiv2');
+			let height = window.document.body.clientHeight;
+			let width = window.document.body.clientWidth;
+			loading.setAttribute('style','display:block;position:absolute;top:0;left:0;width:'+width+'px;height:'+height+'px;padding-top:100px');
+			loading.innerHTML = '<div class="loader" style="margin:0 auto;"></div>';
+			document.body.appendChild(loading);
+		}else {
+			let loading2 = document.getElementById('loadingdiv2');
+			laoding2.style.display = 'block';
 		}
 	}
 	p.getListById = function(list,listid,sort) {
@@ -734,32 +775,50 @@ var jpmplayer = {};
 			document.getElementById("addform").style.display = 'block';
 		}
 	}
+	
 	const configureApp = function() {
-		let input = document.getElementById("playlistconfig");
-		let liststring = input.value.replaceAll('\\','~');
-		if(liststring != ''){
-			try{
-				let pitems = JSON.parse(liststring);
-				if(pitems.config.allow !== undefined){
-					console.log(pitems.config.allow);
-					let settings = [];
-					for(let i = 0;pitems.config.allow.length>i;i++){
-						var iframe = pitems.config.allow[i].iframe;
-						var domain = pitems.config.allow[i].domain;
-						settings.push({"iframe":iframe,"domain":domain});
+		if(document.getElementById("playlistconfig")){
+			let input = document.getElementById("playlistconfig");
+			let liststring = input.value.replaceAll('\\','~');
+			if(liststring != ''){
+				try{
+					let pitems = JSON.parse(liststring);
+					if(pitems.config.allow !== undefined){
+						console.log(pitems.config.allow);
+						let settings = [];
+						let css = pitems.config.css !== undefined ? pitems.config.css : '';
+						let logo = pitems.config.logo !== undefined ? pitems.config.logo : '';
+						p.videowidth = pitems.config.videowidth !== undefined ? pitems.config.videowidth : '';
+						p.videoheight = pitems.config.videoheight !== undefined ? pitems.config.videoheight : '';
+						if(document.getElementsByTagName("link") && css != ''){
+							document.getElementsByTagName("link")[0].href = css;
+						}
+						if(document.getElementById("logo") && logo != ''){
+							document.getElementById("logo").src = logo;
+						}	
+						for(let i = 0;pitems.config.allow.length>i;i++){
+							var iframe = pitems.config.allow[i].iframe;
+							var domain = pitems.config.allow[i].domain;
+							settings.push({"iframe":iframe,"domain":domain});
+						}
+						
+						let list = {"config":{"regex":pitems.config.regex,"allow":settings,"css":css,"logo":logo,"height":p.videoheight,"width":p.videowidth}};
+						storeJSON(list,"config");
+
+						if(document.getElementById("appstatus")){
+							var status = document.getElementById("appstatus");
+							status.innerHTML = 'Saving...';
+							setTimeout(function(){
+								status.innerHTML = 'Configuration saved.';
+							},1000);
+						}
 					}
-					let list = {"config":{"regex":pitems.config.regex,"allow":settings}};
-					console.log(list);
-					storeJSON(list,"config");
-					alert("Configuration saved.");
+				}catch (e) {
+					alert('Sorry, import configuration data is bad. Default settings will be used instead. ' + e);
 				}
-			}catch (e) {
-				alert('Sorry, import configuration data is bad. Default settings will be used instead.');
 			}
 		}
 	}
-	// added v2
-	
 
 	const decodeEntities = function(text) {
 		var entities = {'amp': '&','apos': '\'','#x27': '\'','#x2F': '/','#39': '\'','#47': '/','lt': '<','gt': '>','nbsp': ' ','quot': '"'}

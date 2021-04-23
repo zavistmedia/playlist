@@ -14,6 +14,16 @@
  // for support, see my blog: https://jimswebtech.blogspot.com/
 
  */
+#exported2 {
+	display: block;
+	width: 100%;
+	height: 160px;
+	margin-top: 20px;
+	box-sizing: border-box;
+}
+div#appstatus {
+	margin-bottom: 20px;
+}
 textarea#playlistconfig {
 	margin-bottom: 20px;
 	width: 100%;
