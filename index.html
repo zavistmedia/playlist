@@ -65,7 +65,7 @@
 		// onclick get playlist
 		'getPlaylist' : function(id){
 			// overlay interface
-			jpmx2.fullScreen('<div class="wrap-container"><div class="left-column" id="left-column"><iframe width="760" height="515" src="" style="max-width:100%;max-height:100%;" frameborder="0" id="videoframe" allowfullscreen></iframe></div><div class="right-column" id="right-column"><div id="sidebarlist"><button onclick="jpmplayer.addForm(\'add\')" id="addform">Add Videos</button><div id="addvideoform"><form method="post" action="" onsubmit="return false;"><div><input type="text" placeholder="Video Title" id="videotitle" /></div><div><input type="text" placeholder="Video URL" id="videourl" /></div><button onclick="jpmplayer.addItem(\''+id+'\')">Add Video</button> &nbsp; <button onclick="jpmplayer.addForm(\'done\')">Done</button></form></div><div id="playlist"></div></div></div>');
+			jpmx2.fullScreen('<div class="wrap-container"><div class="left-column" id="left-column"><iframe width="760" height="515" src="" style="max-width:100%;max-height:100%;" frameborder="0" id="videoframe" allowfullscreen></iframe></div><div class="right-column" id="right-column"><div id="sidebarlist"><button onclick="jpmplayer.addForm(\'add\')" id="addform">Add Videos</button><div id="addvideoform"><form method="post" action="" onsubmit="return false;"><div><input type="text" placeholder="Video Title" id="videotitle" /></div><div><input type="text" placeholder="Video URL" id="videourl" /></div><div id="addformbuttons"><button onclick="jpmplayer.addItem(\''+id+'\')">Add Video</button> <button onclick="jpmplayer.addForm(\'done\')">Done</button></div></form></div><div id="playlist"></div></div></div>');
 			jpmplayer.getList(id);
 		},
 		'onLoad': function() {},
