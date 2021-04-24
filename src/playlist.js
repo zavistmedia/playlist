@@ -487,7 +487,6 @@ var jpmplayer = {};
 		}
 	}
 	p.loadConfig = function() {
-
 		if(!document.getElementById('loadingdiv2')){
 			let loading = document.createElement('div');
 			loading.setAttribute('class','loading');
@@ -499,7 +498,8 @@ var jpmplayer = {};
 			document.body.appendChild(loading);
 		}else {
 			let loading2 = document.getElementById('loadingdiv2');
-			laoding2.style.display = 'block';
+			loading2.style.display = 'block';
+			console.log(loading2.style.display);
 		}
 	}
 	p.getListById = function(list,listid,sort) {
@@ -791,6 +791,15 @@ var jpmplayer = {};
 						p.videowidth = pitems.config.videowidth !== undefined ? pitems.config.videowidth : '';
 						p.videoheight = pitems.config.videoheight !== undefined ? pitems.config.videoheight : '';
 						if(document.getElementsByTagName("link") && css != ''){
+							if(document.getElementById("main-container")){
+								p.loadConfig();
+								let layout = document.getElementById("main-container");
+								layout.style.display = 'none';
+								setTimeout(function(){
+									layout.style.display = 'block';
+									document.getElementById("loadingdiv2").style.display = 'none';
+								},500);
+							}
 							document.getElementsByTagName("link")[0].href = css;
 						}
 						if(document.getElementById("logo") && logo != ''){
@@ -935,6 +944,8 @@ var jpmplayer = {};
 			}else {
 				alert('A video URL is required input.');
 			}
+		}else {
+			alert('Sorry, your web or mobile browser does not support Local Storage or it\'s disabled in settings. Try another browser that does.');
 		}
 	}
 	return p;
