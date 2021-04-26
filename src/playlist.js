@@ -28,7 +28,7 @@ var jpmplayer = {};
 	const debug = false;
 	p.ini = function(set){
 		p.regmatch = (set.regmatch !== undefined) ? set.regmatch :/(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(watch\?v\=|video\/|embed\/)(.+)/i;
-		p.regmatch2 = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly)\/(.+)/i;
+		p.regmatch2 = /(http?s:\/\/www\.|http?s:\/\/|www\.)(.+)(\.com|\.be|\.ly|\.net|\.org)\/(.+)/i;
 		p.getPlaylist = (set.getPlaylist !== undefined) ? set.getPlaylist : function(id){alert('No popup interface defined for '+id+'.')};
 		p.onPlay = (set.onPlay !== undefined) ? set.onPlay : function(id){};
 		p.onLoad = (set.onLoad !== undefined) ? set.onLoad : function(id){};
@@ -36,12 +36,12 @@ var jpmplayer = {};
 		p.onhover = (set.onhover !== undefined) ? set.onhover : false;
 		p.videoheight = '';
 		p.videowidth = '';
+		p.cover = '';
 		p.serverURL = (set.serverURL !== undefined) ? set.serverURL : 'https://www.{domain}/embed/{vid}{query}';
 		p.docHeight = window.document.body.clientHeight;
 		p.docWidth = window.document.body.clientWidth;
 		this.onLoad();
 		if(localStorage.getItem("config"+p.playerUID)){
-
 				this.loadConfig();
 				//setTimeout(function(){},500)
 				try{
@@ -61,7 +61,7 @@ var jpmplayer = {};
 						document.getElementById("loadingdiv2").style.display = 'none';
 					}
 				}catch(e){}
-		}			
+		}
 		p.getPlaylists();
 	}
 	p.playerUID = 'X2';
@@ -181,7 +181,7 @@ var jpmplayer = {};
 				if(!p.in_array2(id,list)){
 					list.push({"id":id,"title":title,"sort":sort,"data":pitems.playlist.data});
 					try{
-						
+
 						storeJSON(list);
 						p.getPlaylists();
 						if(control == 'sidebar'){
@@ -363,8 +363,8 @@ var jpmplayer = {};
 							return 0
 						})
 					}else if(sort == ''){}
-				}				
-				
+				}
+
 				let total = (items.length - 1);
 				for(let i = total;0<=i;i--){
 					console.log(items[i]);
@@ -405,9 +405,31 @@ var jpmplayer = {};
 			video.style.height = this.videoheight+'px';
 		}
 		let leftface = document.getElementById('left-column');
+
 		let embed = domain+tld;
 		embed = (embed == 'youtu.be') ? 'youtube.com' : embed;
 		let symbol = vid.indexOf('?') > -1 ? '&' : '?';
+
+		console.log(vid,' video id');
+
+		let origquery = '';
+		if(symbol == '&'){
+			let vidurl = vid.split('&');
+			if(vidurl[1] !== undefined){
+				vid = vidurl[0];
+				origquery = vidurl[1];
+			}
+		}else {
+			if(vid.indexOf('&') > -1){
+				let vidurl = vid.split('&');
+				if(vidurl[1] !== undefined){
+					vid = vidurl[0];
+					origquery = vidurl[1];
+				}
+			}
+		}
+		symbol = vid.indexOf('?') > -1 ? '&' : '?';
+
 		let extend = '';
 
 		this.domain = embed;
@@ -420,6 +442,7 @@ var jpmplayer = {};
 					for(let i = 0;list.config.allow.length>i;i++){
 						var iframe = list.config.allow[i].iframe;
 						var domain = list.config.allow[i].domain;
+						var cover = list.config.allow[i].cover !== undefined ? list.config.allow[i].cover : '';
 						if(this.domain == domain){
 							iframe = iframe.replaceAll("(","{");
 							iframe = iframe.replaceAll(")","}");
@@ -429,8 +452,8 @@ var jpmplayer = {};
 				}
 				//console.log(this.serverURL,'in playvideo');
 			}catch(e){}
-		}			
-		
+		}
+
 		let newurl = this.serverURL;
 
 		if(autoplay){
@@ -438,9 +461,10 @@ var jpmplayer = {};
 		}
 
 		newurl = newurl.replace('{query}',extend);
+		newurl = newurl.replace('{origquery}',origquery);
 		newurl = newurl.replace('{vid}',vid);
 		this.iframeURL = newurl.replace('{domain}',embed);
-		
+
 		//console.log(this.iframeURL);
 		//return;
 		//this.iframeURL = "https://www."+embed+"/embed/"+vid+extend;
@@ -513,7 +537,7 @@ var jpmplayer = {};
 				break;
 			}
 		}
-		
+
 		if(typeof(sort) !== 'undefined') {
 			storeJSON(list);
 		}
@@ -550,9 +574,9 @@ var jpmplayer = {};
 				let playing = this.getListById(list,listid,sort);
 				let items = playing.list.data;
 				let sortset = false;
-				
+
 				if(typeof(sort) === 'undefined') {
-					if(playing.sort !== undefined){
+					if(playing.list.sort !== undefined){
 						sort = playing.list.sort;
 					}
 				}else {
@@ -606,13 +630,13 @@ var jpmplayer = {};
 						})
 					}
 				}
-				
+
 				console.log(items);
 				let total = (items.length - 1);
 				let count = 0;
 				let lasti = 0;
 				let has_videos = false;
-				
+
 				let editlabel = 'Edit';
 				let saving = false;
 				if(typeof(edit) !== 'undefined') {
@@ -629,11 +653,20 @@ var jpmplayer = {};
 				}else {
 					editlabel = 'Edit';
 					this.edit = false;
-				}					
-				
+				}
+
+				let allow = '';
+				if(localStorage.getItem("config"+p.playerUID)){
+					try{
+						let config = JSON.parse(localStorage.getItem("config"+p.playerUID));
+						allow = config.config.allow;
+						console.log(allow);
+					}catch(e){}
+				}
+
 				for(let i = total;0<=i;i--){
 					if(items[i].list == listid){
-						
+
 						if(saving){
 							let newtitle = document.getElementById('video-'+i).innerHTML;
 							if(newtitle != ''){
@@ -641,35 +674,53 @@ var jpmplayer = {};
 								items[i].title = newtitle.replace(this.reg, '');
 							}
 						}
-						
+
 						has_videos = true;
 						let img = '';
-						
+
 						let ahref = '';
 						if(this.edit) {
 							ahref = 'href="javascript:jpmplayer.editData(\''+items[i].id+'\',this)" id="video-'+i+'" contenteditable="true" style="border: 1px dashed red"';
 						}else {
 							ahref = 'href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'"';
 						}
-						
+
 						if(this.onhover){
-							
+
 						row += '<div class="playlist-item" onmouseenter="jpmplayer.showImg(\''+items[i].id+'\',\''+items[i].type+'\',this)" onmouseleave="jpmplayer.showImg(\''+items[i].id+'\',\''+items[i].type+'\',this)"><a '+ahref+' class="itemtitle">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',\''+listid+'\',this)"></span></div>';
-						
+
 						}else {
-							
+
 							/* Note: in the future I will replace these with a onclick event handler callback */
-							
 							let cleantitle = items[i].title.replaceAll('"',items[i].title);
-							
-							if(items[i].type == 'youtube'){
-								img = '<div class="imghold"><img src="https://i.ytimg.com/vi/'+items[i].id+'/default.jpg" alt="'+cleantitle+'" class="coverimg" onclick="jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" /></div>';
+
+							let coverdomain = '';
+							let cover = '';
+							if(allow != ''){
+								for(let k = 0;allow.length>k;k++){
+									if(items[i].type +''+ items[i].tld == allow[k].domain){
+										coverdomain = allow[k].domain;
+										cover = allow[k].cover !== undefined ? allow[k].cover : '';
+										cover = cover.replaceAll('(vid)',items[i].id);
+									}
+								}
+								if(cover == ''){
+									coverdomain = 'youtube.com';
+									cover = 'https://i.ytimg.com/vi/'+items[i].id+'/default.jpg';
+								}
+							}else {
+								coverdomain = 'youtube.com';
+								cover = 'https://i.ytimg.com/vi/'+items[i].id+'/default.jpg';
 							}
-							
+
+							if(items[i].type +''+ items[i].tld == coverdomain){
+								img = '<div class="imghold"><img src="'+cover+'" alt="'+cleantitle+'" class="coverimg" onclick="jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" /></div>';
+							}
+
 							row += '<div class="playlist-item">'+img+'<a '+ahref+' class="itemtitle">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',\''+listid+'\',this)"></span></div>';
-							
+
 						}
-						
+
 						 if(count == 0){
 							lasti = i;
 						 }
@@ -677,7 +728,7 @@ var jpmplayer = {};
 					}
 				}
 				count--;
-				
+
 				if(saving){
 					list[playing.id].data = items;
 					storeJSON(list);
@@ -775,7 +826,7 @@ var jpmplayer = {};
 			document.getElementById("addform").style.display = 'block';
 		}
 	}
-	
+
 	const configureApp = function() {
 		if(document.getElementById("playlistconfig")){
 			let input = document.getElementById("playlistconfig");
@@ -804,13 +855,14 @@ var jpmplayer = {};
 						}
 						if(document.getElementById("logo") && logo != ''){
 							document.getElementById("logo").src = logo;
-						}	
+						}
 						for(let i = 0;pitems.config.allow.length>i;i++){
 							var iframe = pitems.config.allow[i].iframe;
+							var cover = pitems.config.allow[i].cover !== undefined ? pitems.config.allow[i].cover : '';
 							var domain = pitems.config.allow[i].domain;
-							settings.push({"iframe":iframe,"domain":domain});
+							settings.push({"iframe":iframe,"domain":domain,"cover":cover});
 						}
-						
+
 						let list = {"config":{"regex":pitems.config.regex,"allow":settings,"css":css,"logo":logo,"height":p.videoheight,"width":p.videowidth}};
 						storeJSON(list,"config");
 
@@ -835,11 +887,11 @@ var jpmplayer = {};
 			return entities[entity] || match
 		})
 	}
-	
+
 	const editData = function(vid,elem){
 		elem.contentEditable = "true";
 	}
-	
+
 	const storeJSON = function(key,name){
 		name = (name === undefined) ? "playlists" : name;
 		try {
@@ -850,14 +902,14 @@ var jpmplayer = {};
 			}
 		}
 	}
-	
+
 	const insertData = function(data,list,listid){
 		for(let i=0, len=list.length;i<len;i++) {
 			if (list[i].id == listid){
 				list[i].data.push(data);
 				p.playlist = list[i];
 			}
-		}		
+		}
 		storeJSON(list);
 	}
     p.addItem = function(listid) {
@@ -869,12 +921,14 @@ var jpmplayer = {};
 			let url = urlinput.value;
 			// for debugging ... do not uncomment
 			if(debug){
-				url = 'http://www.youtube.com/' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
+				// url = 'https://www.youtube.com/' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
+				//url = 'http://www.youtube.com/watch?v=' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36)+'&blah=d';
+
 			}
 			if(url != null && url != ''){
 				if(url.indexOf('&') > -1){
-					var spliturl = url.split('&');
-					url = spliturl[0];
+					//var spliturl = url.split('&');
+					//url = spliturl[0];
 				}
 				url = url.replace(this.urlreg, '');
 				//let title = prompt("Enter video title:");
@@ -885,7 +939,7 @@ var jpmplayer = {};
 				}else {
 					title = title.replace(this.reg, '');
 				}
-				
+
 				let setregex = '';
 				if(localStorage.getItem("config"+p.playerUID)){
 					try{
