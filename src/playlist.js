@@ -719,14 +719,16 @@ var jpmplayer = {};
 								}
 								if(cover == ''){
 									coverdomain = 'youtube.com';
+									coverdomain = (items[i].type +''+ items[i].tld == 'youtu.be') ? 'youtube.com' : coverdomain;
 									cover = 'https://i.ytimg.com/vi/'+imgvid+'/default.jpg';
 								}
 							}else {
 								coverdomain = 'youtube.com';
+								coverdomain = (items[i].type +''+ items[i].tld == 'youtu.be') ? 'youtube.com' : coverdomain;
 								cover = 'https://i.ytimg.com/vi/'+imgvid+'/default.jpg';
 							}
 
-							if(items[i].type +''+ items[i].tld == coverdomain){
+							if(coverdomain == 'youtube.com'){
 								img = '<div class="imghold"><img src="'+cover+'" alt="'+cleantitle+'" class="coverimg" onclick="jpmplayer.playVideo(\''+imgvid+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" /></div>';
 							}
 
