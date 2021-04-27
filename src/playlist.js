@@ -697,7 +697,6 @@ var jpmplayer = {};
 							var spliturl = items[i].id.split('&');
 							imgvid = spliturl[0];
 						}
-						imgvid = imgvid.replace(this.urlreg, '');
 
 						if(this.onhover){
 
