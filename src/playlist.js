@@ -4,7 +4,7 @@
  // http://www.jpmalloy.com
  // james (@) jpmalloy.com
  // Credit must stay intact for legal use
- // Version 2 (build "1.7")
+ // Version 2 (build "1.8")
  // *** 100% free, do with what you like with credit back ***
  // No outside plugins required
  // Feel free to share with others
@@ -578,13 +578,17 @@ var jpmplayer = {};
 				if(typeof(sort) === 'undefined') {
 					if(playing.list.sort !== undefined){
 						sort = playing.list.sort;
+					}else {
+						sort = 'new';
 					}
 				}else {
 					sortset = true;
 				}
 
+				let atozclass = '', ztoaclass = '', newclass = '', oldclass = '';
 				if(typeof(sort) !== 'undefined') {
 					if(sort == 'a-z'){
+						atozclass = ' class="sortbold"';
 						items.sort(function(a, b){
 							var titleA = a.title.toLowerCase(), titleB = b.title.toLowerCase();
 							if(titleA > titleB){
@@ -596,6 +600,7 @@ var jpmplayer = {};
 							return 0
 						})
 					}else if(sort == 'z-a'){
+						ztoaclass = ' class="sortbold"';
 						items.sort(function(a, b){
 							var titleA = a.title.toLowerCase(), titleB = b.title.toLowerCase();
 							if(titleA < titleB){
@@ -607,6 +612,7 @@ var jpmplayer = {};
 							return 0
 						})
 					}else if(sort == 'old'){
+						oldclass = ' class="sortbold"';
 						items.sort(function(a, b){
 							var dateA = a.date, dateB = b.date;
 							if(dateA > dateB){
@@ -617,7 +623,8 @@ var jpmplayer = {};
 							}
 							return 0
 						})
-					}else if(sort == ''){
+					}else if(sort == '' || sort == 'new'){
+						newclass = ' class="sortbold"';
 						items.sort(function(a, b){
 							var dateA = a.date, dateB = b.date;
 							if(dateA < dateB){
@@ -738,7 +745,7 @@ var jpmplayer = {};
 
 				let pl = document.getElementById("playlist");
 				pl.style.display = (total == -1) ? 'none' : 'block';
-				pl.innerHTML = '<div style="margin-bottom:20px"><a href="javascript:jpmplayer.sortList(\''+listid+'\',\'a-z\')">A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'z-a\')">Z-A</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'\')">Newest</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'old\')">Oldest</a> &nbsp; <a href="javascript:void(0)" onclick="jpmplayer.getList(\''+listid+'\',\'a-z\',this)">'+editlabel+'</a></div><div id="jpmplayer">' + row + '</div><div style="margin-top:20px"><a href="javascript:jpmplayer.export(\''+listid+'\')">Export</a> &nbsp; <a href="javascript:jpmplayer.outputHTML(\'sidebar\')">Import</a></div>';
+				pl.innerHTML = '<div style="margin-bottom:20px"><a href="javascript:jpmplayer.sortList(\''+listid+'\',\'a-z\')"'+atozclass+'>A-Z</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'z-a\')"'+ztoaclass+'>Z-A</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'\')"'+newclass+'>Newest</a> &nbsp; <a href="javascript:jpmplayer.sortList(\''+listid+'\',\'old\')"'+oldclass+'>Oldest</a> &nbsp; <a href="javascript:void(0)" onclick="jpmplayer.getList(\''+listid+'\',\'a-z\',this)">'+editlabel+'</a></div><div id="jpmplayer">' + row + '</div><div style="margin-top:20px"><a href="javascript:jpmplayer.export(\''+listid+'\')">Export</a> &nbsp; <a href="javascript:jpmplayer.outputHTML(\'sidebar\')">Import</a></div>';
 
 				if(has_videos && !sortset){
 					this.playVideo(''+items[lasti].id+'',''+items[lasti].type+'',''+items[lasti].tld+'','video-'+lasti,false);
@@ -921,7 +928,7 @@ var jpmplayer = {};
 			let url = urlinput.value;
 			// for debugging ... do not uncomment
 			if(debug){
-				// url = 'https://www.youtube.com/' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
+				 url = 'https://www.youtube.com/' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36);
 				//url = 'http://www.youtube.com/watch?v=' + (Math.floor(Math.random() * 1000000000) + 10000000).toString(36)+'&blah=d';
 
 			}
