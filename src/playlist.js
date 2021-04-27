@@ -691,6 +691,13 @@ var jpmplayer = {};
 						}else {
 							ahref = 'href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'"';
 						}
+						
+						var imgvid = items[i].id;
+						if(items[i].id.indexOf('&') > -1){
+							var spliturl = items[i].id.split('&');
+							imgvid = spliturl[0];
+						}
+						imgvid = imgvid.replace(this.urlreg, '');
 
 						if(this.onhover){
 
@@ -708,20 +715,20 @@ var jpmplayer = {};
 									if(items[i].type +''+ items[i].tld == allow[k].domain){
 										coverdomain = allow[k].domain;
 										cover = allow[k].cover !== undefined ? allow[k].cover : '';
-										cover = cover.replaceAll('(vid)',items[i].id);
+										cover = cover.replaceAll('(vid)',imgvid);
 									}
 								}
 								if(cover == ''){
 									coverdomain = 'youtube.com';
-									cover = 'https://i.ytimg.com/vi/'+items[i].id+'/default.jpg';
+									cover = 'https://i.ytimg.com/vi/'+imgvid+'/default.jpg';
 								}
 							}else {
 								coverdomain = 'youtube.com';
-								cover = 'https://i.ytimg.com/vi/'+items[i].id+'/default.jpg';
+								cover = 'https://i.ytimg.com/vi/'+imgvid+'/default.jpg';
 							}
 
 							if(items[i].type +''+ items[i].tld == coverdomain){
-								img = '<div class="imghold"><img src="'+cover+'" alt="'+cleantitle+'" class="coverimg" onclick="jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" /></div>';
+								img = '<div class="imghold"><img src="'+cover+'" alt="'+cleantitle+'" class="coverimg" onclick="jpmplayer.playVideo(\''+imgvid+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" /></div>';
 							}
 
 							row += '<div class="playlist-item">'+img+'<a '+ahref+' class="itemtitle">'+items[i].title+'</a><span class="removeitem" onclick="javascript:jpmplayer.removeItem(\''+items[i].id+'\',\''+listid+'\',this)"></span></div>';
