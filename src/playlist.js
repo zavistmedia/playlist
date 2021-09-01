@@ -73,39 +73,37 @@ var jpmplayer = {};
 	p.reg = /[^A-Za-z0-9,‘’”“'"*$#^+!()=?&:;/_.-\s]/gm;
 	p.urlreg = /[^A-Za-z0-9'"*$#^+!()=?&:/_.-]/gm;
 	p.importAll = function(pitems) {
-		if(localStorage.getItem("playlists"+p.playerUID)){
-			try{
-				let list = JSON.parse(localStorage.getItem("playlists"+p.playerUID));
-				list = (list === null || list === undefined) ? [] : list;
-				let videos = [];
-				for(let i = 0;pitems.playlists.length>i;i++){
-					var id = pitems.playlists[i].id;
-					var title = pitems.playlists[i].title;
-					var sort = pitems.playlists[i].sort !== undefined ? pitems.playlists[i].sort : '';
-					if(!p.in_array2(id,list)){
-						// playlist not in existing array, add it
-						list.push({"id":id,"title":title,"sort":sort,"data":pitems.playlists[i].data});
-						if(document.getElementById("exported2")){
-							let exported2 = document.getElementById("exported2");
-							exported2.value = '';
-							exported2.innerHTML = '';
-						}
-						if(document.getElementById("exported")){
-							let exported = document.getElementById("exported");
-							exported.value = '';
-							exported.innerHTML = '';
-						}
-						document.getElementById("yourlists").style.display = "block";
-					}else {
-						alert('Could not add playlist '+title+' ('+id+'), because it already exists.');
-					}
-				}
-				storeJSON(list);
-				p.getPlaylists();
-			}catch(err) {
-				alert('Sorry, could not import playlist. The data is corrupted. ' + err);
-			}
-		}
+        try{
+            let list = localStorage.getItem("playlists"+p.playerUID);
+            list = (list === null || list === undefined) ? [] : JSON.parse(list);
+            let videos = [];
+            for(let i = 0;pitems.playlists.length>i;i++){
+                var id = pitems.playlists[i].id;
+                var title = pitems.playlists[i].title;
+                var sort = pitems.playlists[i].sort !== undefined ? pitems.playlists[i].sort : '';
+                if(!p.in_array2(id,list)){
+                    // playlist not in existing array, add it
+                    list.push({"id":id,"title":title,"sort":sort,"data":pitems.playlists[i].data});
+                    if(document.getElementById("exported2")){
+                        let exported2 = document.getElementById("exported2");
+                        exported2.value = '';
+                        exported2.innerHTML = '';
+                    }
+                    if(document.getElementById("exported")){
+                        let exported = document.getElementById("exported");
+                        exported.value = '';
+                        exported.innerHTML = '';
+                    }
+                    document.getElementById("yourlists").style.display = "block";
+                }else {
+                    alert('Could not add playlist '+title+' ('+id+'), because it already exists.');
+                }
+            }
+            storeJSON(list);
+            p.getPlaylists();
+        }catch(err) {
+            alert('Sorry, could not import playlist. The data is corrupted. ' + err);
+        }
 	}
 	p.outputHTML = function(control) {
 
@@ -691,7 +689,7 @@ var jpmplayer = {};
 						}else {
 							ahref = 'href="javascript:jpmplayer.playVideo(\''+items[i].id+'\',\''+items[i].type+'\',\''+items[i].tld+'\',\'video-'+i+'\',true)" id="video-'+i+'"';
 						}
-						
+
 						var imgvid = items[i].id;
 						if(items[i].id.indexOf('&') > -1){
 							var spliturl = items[i].id.split('&');
